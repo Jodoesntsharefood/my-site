@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EU AI Act 风险定级工具 | TÜV Rheinland</title>
+
+    <!-- 引入高端字体体系 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tuvBlue: '#0071B9',
+                        tuvBlueLight: '#338DCD',
+                        techCyan: '#00C2FF',
+                        appleBg: '#F5F5F7',
+                        charcoal: '#1A1D20',
+                        muted: '#86868B'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    boxShadow: {
+                        'tech': '0 30px 60px -15px rgba(0, 113, 185, 0.12), 0 0 0 1px rgba(0, 113, 185, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.8)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP 3 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        /* 锁定全局滚动 */
+        body,
+        html {
+            background-color: var(--appleBg);
+            color: var(--charcoal);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 1. 科技数据网格背景 */
+        .tech-grid {
+            position: fixed;
+            inset: 0;
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, rgba(0, 113, 185, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 113, 185, 0.03) 1px, transparent 1px);
+            z-index: 0;
+            pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        /* 2. 弥散光背景 */
+        .hero-mesh-bg {
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(at 20% 0%, rgba(0, 113, 185, 0.06) 0px, transparent 40%),
+                radial-gradient(at 80% 100%, rgba(0, 194, 255, 0.08) 0px, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 3. 面板内部自定义滚动条 (隐藏滚动条但保留功能) */
+        .custom-scrollbar {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 113, 185, 0.2) transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 113, 185, 0.2);
+            border-radius: 4px;
+        }
+
+        /* 4. 精密仪器面板 (四角准星特效) */
+        .instrument-panel {
+            position: relative;
+        }
+
+        .instrument-crosshairs {
+            position: absolute;
+            inset: 1rem;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .instrument-crosshairs::before,
+        .instrument-crosshairs::after,
+        .instrument-crosshairs-bottom::before,
+        .instrument-crosshairs-bottom::after {
+            content: '+';
+            position: absolute;
+            font-family: 'JetBrains Mono';
+            color: #0071B9;
+            opacity: 0.3;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .instrument-crosshairs::before {
+            top: 0;
+            left: 0;
+        }
+
+        .instrument-crosshairs::after {
+            top: 0;
+            right: 0;
+        }
+
+        .instrument-crosshairs-bottom {
+            position: absolute;
+            inset: 1rem;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .instrument-crosshairs-bottom::before {
+            bottom: 0;
+            left: 0;
+        }
+
+        .instrument-crosshairs-bottom::after {
+            bottom: 0;
+            right: 0;
+        }
+
+        /* 5. 选项卡片科技 Hover 特效 */
+        .spotlight-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 113, 185, 0.1);
+            border-radius: 1rem;
+            transition: all 0.2s ease-out;
+            overflow: hidden;
+        }
+
+        .spotlight-card .bracket {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'JetBrains Mono';
+            font-size: 1.2rem;
+            color: #0071B9;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .spotlight-card .bracket.left {
+            left: 1rem;
+            transform: translate(-5px, -50%);
+        }
+
+        .spotlight-card .bracket.right {
+            right: 1rem;
+            transform: translate(5px, -50%);
+        }
+
+        .spotlight-card:hover {
+            background: #ffffff;
+            border-color: rgba(0, 113, 185, 0.4);
+            box-shadow: 0 8px 20px -6px rgba(0, 113, 185, 0.25), 0 0 0 1px rgba(0, 113, 185, 0.4);
+            transform: translateY(-2px);
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+            z-index: 10;
+        }
+
+        .spotlight-card:hover .bracket {
+            opacity: 1;
+            transform: translate(0, -50%);
+            font-weight: bold;
+        }
+
+        .spotlight-card.active-selected {
+            background: #ffffff;
+            border-color: rgba(0, 113, 185, 0.4);
+            box-shadow: 0 4px 15px -4px rgba(0, 113, 185, 0.3), inset 0 0 0 2px rgba(0, 113, 185, 0.2);
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+            z-index: 10;
+        }
+
+        .spotlight-card.active-selected .bracket {
+            opacity: 1;
+            transform: translate(0, -50%);
+            font-weight: bold;
+        }
+
+        /* 6. 动态条纹进度条 */
+        .progress-stripes {
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+            background-size: 1rem 1rem;
+            animation: moveStripes 1s linear infinite;
+        }
+
+        @keyframes moveStripes {
+            0% {
+                background-position: 1rem 0;
+            }
+
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        /* 7. 扫描光束叠加层 */
+        .scanner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent, rgba(0, 194, 255, 0.1) 50%, #00C2FF 50%, transparent 51%);
+            background-size: 100% 200%;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+
+        /* 强调斜体 */
+        .risk-italic {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 600;
+            color: #0071B9;
+            font-size: 1.15em;
+        }
+
+        .output-text {
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col">
+
+    <!-- 背景层 -->
+    <div class="tech-grid"></div>
+    <div class="hero-mesh-bg"></div>
+
+    <!-- 顶部状态栏 (高度固定) -->
+    <header
+        class="relative z-20 h-16 w-full flex items-center justify-between px-6 border-b border-tuvBlue/10 bg-white/40 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <div class="relative w-4 h-4 flex items-center justify-center">
+                <div class="absolute inset-0 border border-tuvBlue rounded-sm animate-[spin_4s_linear_infinite]"></div>
+                <div class="w-1.5 h-1.5 bg-tuvBlue rounded-[1px]"></div>
+            </div>
+            <div class="font-display font-bold tracking-tight text-lg text-charcoal">EU AI Act 风险定级工具</div>
+            <div
+                class="hidden md:flex ml-4 pl-4 border-l border-tuvBlue/20 font-mono text-[10px] text-tuvBlue/60 flex-col leading-tight">
+                <span>SYS_VER: 2.1.0</span>
+                <span id="live-hash">HASH: A8F9...</span>
+            </div>
+        </div>
+        <button onclick="resetEngine()"
+            class="flex items-center gap-2 px-4 py-1.5 rounded bg-tuvBlue/5 font-mono text-[11px] tracking-widest uppercase border border-tuvBlue/20 text-tuvBlue hover:bg-tuvBlue hover:text-white transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+            </svg>
+            重新测试
+        </button>
+    </header>
+
+    <!-- 中央交互区 (自适应填充剩余空间) -->
+    <main class="relative z-10 flex-1 flex items-center justify-center p-4 md:p-8 overflow-hidden">
+
+        <!-- 欢迎控制台面板 -->
+        <div id="greeting-view"
+            class="instrument-panel w-full max-w-5xl h-full max-h-[90vh] bg-white/80 backdrop-blur-3xl border border-white rounded-[1.5rem] md:rounded-[2rem] shadow-tech flex flex-col transition-all duration-300">
+
+            <div class="instrument-crosshairs"></div>
+            <div class="instrument-crosshairs-bottom"></div>
+
+            <div class="relative z-10 flex flex-col h-full items-center justify-center p-8 md:p-12 text-center">
+                <div class="mb-8 relative">
+                    <div class="absolute inset-0 bg-techCyan/10 blur-xl rounded-full"></div>
+                    <svg class="w-20 h-20 text-tuvBlue relative z-10 mx-auto" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                </div>
+
+                <h1 class="font-display text-2xl md:text-5xl text-charcoal font-bold tracking-tight mb-4 md:mb-6 px-4">
+                    EU AI Act 风险定级工具
+                </h1>
+
+                <p
+                    class="font-sans text-[14px] md:text-lg text-charcoal/70 leading-relaxed max-w-3xl mb-8 md:mb-12 px-2">
+                    欢迎使用 TÜV Rheinland AI 风险定级工具。本工具将通过一系列专业预审问题，<br class="hidden md:block">
+                    快速帮助您评估 AI 产品或服务在《欧盟人工智能法案》下的合规风险等级，并提供针对性的建议方案。
+                </p>
+
+                <button onclick="startDiagnostic()"
+                    class="group relative px-8 py-4 bg-tuvBlue text-white font-mono font-bold tracking-widest text-sm uppercase rounded shadow-[0_4px_15px_rgba(0,113,185,0.3)] hover:bg-tuvBlueLight hover:-translate-y-1 transition-all overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    </div>
+                    <div class="relative z-10 flex items-center gap-3">
+                        开始测试
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 问题控制台面板 -->
+        <div id="console-container"
+            class="instrument-panel w-full max-w-5xl h-full max-h-[90vh] bg-white/80 backdrop-blur-3xl border border-white rounded-[1.5rem] md:rounded-[2rem] shadow-tech hidden flex flex-col transition-all duration-300">
+
+            <div class="instrument-crosshairs hidden md:block"></div>
+            <div class="instrument-crosshairs-bottom hidden md:block"></div>
+            <div id="scanner" class="scanner-overlay rounded-[1.5rem] md:rounded-[2rem]"></div>
+
+            <div class="relative z-10 flex flex-col h-full p-4 md:p-10">
+
+                <!-- 顶部进度与控制 -->
+                <div
+                    class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0 border-b border-tuvBlue/10 pb-6">
+                    <div class="flex items-center gap-4">
+                        <button id="btn-back" onclick="goBack()"
+                            class="w-8 h-8 flex items-center justify-center rounded bg-tuvBlue/5 border border-tuvBlue/10 text-tuvBlue hover:bg-tuvBlue hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m12 19-7-7 7-7" />
+                                <path d="M19 12H5" />
+                            </svg>
+                        </button>
+                        <div class="flex flex-col">
+                            <span class="font-mono text-[10px] text-muted tracking-widest uppercase">Process
+                                Status</span>
+                            <span id="step-indicator"
+                                class="font-mono text-xs tracking-widest text-tuvBlue uppercase font-bold flex items-center gap-1">
+                                NODE_01 / 06 <span class="w-1.5 h-3 bg-tuvBlue animate-pulse inline-block"></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 动态进度条 -->
+                    <div class="w-full md:w-1/3 h-1.5 bg-tuvBlue/10 rounded-full overflow-hidden">
+                        <div id="progress-bar"
+                            class="h-full bg-tuvBlue progress-stripes shadow-[0_0_8px_#00C2FF] transition-all duration-500"
+                            style="width: 16.6%;"></div>
+                    </div>
+                </div>
+
+                <!-- 提示文字 -->
+                <div id="processing-text"
+                    class="hidden font-mono text-[10px] text-techCyan mb-2 flex items-center gap-2 shrink-0">
+                    <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    ANALYZING VECTOR DATA...
+                </div>
+
+                <!-- 题目展示区 -->
+                <div id="question-view" class="mb-4 md:mb-6 shrink-0">
+                    <h2 id="question-text"
+                        class="font-display text-[17px] md:text-2xl text-charcoal font-semibold leading-relaxed tracking-tight">
+                        <!-- 题目动态注入 -->
+                    </h2>
+                </div>
+
+                <!-- 选项交互区 (内部滚动) -->
+                <div id="options-container"
+                    class="flex-1 flex flex-col gap-3 custom-scrollbar px-3 -mx-3 pt-2 relative z-20 pb-6">
+                    <!-- 选项卡片动态注入 -->
+                </div>
+
+                <!-- 确认按钮区 -->
+                <div id="confirm-container"
+                    class="hidden shrink-0 flex justify-end pt-4 border-t border-tuvBlue/10 mt-2 relative z-20">
+                    <button id="btn-confirm"
+                        class="group relative px-8 py-3 bg-tuvBlue/10 border border-tuvBlue text-tuvBlue font-display font-bold tracking-widest uppercase overflow-hidden transition-all hover:bg-tuvBlue hover:text-white hover:shadow-[0_4px_15px_rgba(0,113,185,0.3)] rounded flex items-center gap-2">
+                        <span class="relative z-10 flex items-center gap-2">
+                            下一题
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14" />
+                                <path d="m12 5 7 7-7 7" />
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果展示视图 (同等尺寸) -->
+        <div id="result-view"
+            class="instrument-panel w-full max-w-5xl h-full max-h-[90vh] bg-white/90 backdrop-blur-3xl rounded-[1.5rem] md:rounded-[2rem] border border-tuvBlue/10 shadow-tech hidden flex-col">
+            <div class="instrument-crosshairs hidden md:block"></div>
+            <div class="instrument-crosshairs-bottom hidden md:block"></div>
+
+            <div class="relative z-10 flex flex-col h-full p-4 md:p-10">
+
+                <!-- 结果头部 -->
+                <div class="flex items-center gap-4 mb-6 shrink-0 border-b border-tuvBlue/10 pb-6">
+                    <div class="relative flex items-center justify-center w-5 h-5">
+                        <div class="absolute inset-0 bg-techCyan/20 rounded-full animate-ping"></div>
+                        <div class="w-2 h-2 rounded-full bg-techCyan"></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-mono text-[10px] tracking-widest text-muted uppercase">Diagnostic
+                            Verdict</span>
+                        <span
+                            class="font-mono text-xs tracking-widest text-charcoal font-bold uppercase">COMPLETED</span>
+                    </div>
+                    <span id="result-label"
+                        class="ml-auto font-mono text-[10px] text-tuvBlue font-bold bg-tuvBlue/5 px-3 py-1.5 rounded border border-tuvBlue/20">OUTPUT</span>
+                </div>
+
+                <!-- 结果主体区 (可滚动) -->
+                <div class="flex-1 custom-scrollbar pr-2 flex flex-col gap-6">
+                    <!-- 输出文本 -->
+                    <div id="output-text"
+                        class="output-text font-sans text-charcoal text-[15px] md:text-lg leading-relaxed bg-[#F8F9FA]/80 p-6 md:p-8 rounded-xl border-l-[4px] border-tuvBlue shadow-inner">
+                        <!-- 结果文本动态注入 -->
+                    </div>
+
+                    <!-- 预留图片位置 (科技线框) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div
+                            class="border border-tuvBlue/20 bg-tuvBlue/5 h-40 flex flex-col items-center justify-center relative group transition-colors overflow-hidden rounded-xl">
+                            <div class="absolute top-0 left-0 w-6 h-6 border-t border-l border-tuvBlue/40 m-2"></div>
+                            <div class="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-tuvBlue/40 m-2">
+                            </div>
+                            <svg class="text-tuvBlue/40 mb-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <path d="M2 15h10" />
+                                <path d="M6 12v6" />
+                                <path d="M10 12v6" />
+                            </svg>
+                            <span class="font-mono text-[10px] text-tuvBlue/60 tracking-widest uppercase">Compliance
+                                Matrix 1</span>
+                        </div>
+                        <div
+                            class="border border-tuvBlue/20 bg-tuvBlue/5 h-40 flex flex-col items-center justify-center relative group transition-colors overflow-hidden rounded-xl">
+                            <div class="absolute top-0 left-0 w-6 h-6 border-t border-l border-tuvBlue/40 m-2"></div>
+                            <div class="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-tuvBlue/40 m-2">
+                            </div>
+                            <svg class="text-tuvBlue/40 mb-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <path d="M3 9h18" />
+                                <path d="M9 21V9" />
+                            </svg>
+                            <span class="font-mono text-[10px] text-tuvBlue/60 tracking-widest uppercase">Data Blueprint
+                                2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="shrink-0 flex flex-wrap items-center gap-3 pt-6 border-t border-tuvBlue/10 mt-4">
+                    <button onclick="resetEngine()"
+                        class="bg-tuvBlue text-white px-6 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded shadow-[0_4px_10px_rgba(0,113,185,0.2)] hover:bg-tuvBlueLight hover:-translate-y-0.5 transition-all">
+                        重新测试
+                    </button>
+                    <button onclick="copyResult()"
+                        class="bg-white text-tuvBlue border border-tuvBlue/30 px-6 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded hover:bg-tuvBlue/5 transition-all flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                        拷贝结果
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. 数据源定义 (严格遵循 XMind)
+        // ==========================================
+        const TRIAGE_NODES = {
+            'filter1': {
+                step: 1,
+                q: '您的AI产品/服务是否计划在欧盟成员国进行销售、分发、部署，或者您的AI产品/服务虽然部署在欧盟境外，但其生成的输出结果会被欧盟境内的用户使用？',
+                options: [
+                    { text: '是，我的产品/服务打算进入欧盟。', next: 'filter2' },
+                    { text: '否，我的产品/服务准备进入其他地区。', output: 'R1' }
+                ]
+            },
+            'filter2': {
+                step: 2,
+                q: '您的AI系统是否涉及任何一项设计意图/使用场景？',
+                options: [
+                    { text: '1. 潜意识影响： 使用人类无法察觉的声光刺激来改变用户行为', output: 'R2' },
+                    { text: '2. 弱势群体特征利用：专门针对儿童、残障人士或特定社会群体的弱点进行诱导（如：诱导未成年人非理性消费）', output: 'R2' },
+                    { text: '3. 社会信用评分： 类似于“社会信用体系”，根据个人行为对公民进行评分，并根据评分决定其区别待遇', output: 'R2' },
+                    { text: '4. 犯罪预测： 仅凭个人的生物特征（而非具体犯罪事实）预测其犯罪概率', output: 'R2' },
+                    { text: '5. 无差别面部特征抓取： 从互联网或监控录像中大规模爬取人脸照片来建立数据库', output: 'R2' },
+                    { text: '6. 敏感生物特征推断： 通过扫描人脸或指纹，推断某人的种族、政治倾向、性取向或宗教信仰', output: 'R2' },
+                    { text: '7. 工作/校园情绪识别： 例如在办公室或学校，用AI系统监控员工或学生是“开心”还是“疲劳”（注：驾驶员疲劳监测除外）', output: 'R2' },
+                    { text: '8. 实时远程生物识别： 例如在公共场所（如广场、街道）进行实时“刷脸”找人', output: 'R2' },
+                    { text: '否，我的产品和服务都不涉及如上设计意图/使用场景', next: 'filter3' }
+                ]
+            },
+            'filter3': {
+                step: 3,
+                q: '您提供的AI产品/服务是什么形态？',
+                options: [
+                    { text: 'A. 一个AI系统 ，是一个完整的、可直接使用的产品或应用（如：智能手机中的AI相册、自动驾驶汽车、SaaS聊天机器人平台等）', next: 'q1' },
+                    { text: 'B. 一个AI模型/API/算法包，本身不直接面向最终用户（如：类似于GPT-4的基础模型、开源的LLM权重文件等）', output: 'R3' }
+                ]
+            },
+            'q1': {
+                step: 4,
+                q: '您的AI系统是否作为某产品的安全组件，且该产品本身受欧盟现有法规监管？\n\n<span class="text-sm text-charcoal/60">安全组件（safety component）定义：该组件一旦失灵，将直接导致人身伤亡或财产损毁。\n\n示例： 自动驾驶汽车的避障算法、手术机器人的机械臂控制系统、电梯的紧急制动AI系统、工业机器人的安全围栏AI系统……等</span>',
+                options: [
+                    { text: '是，我的AI系统是一个安全组件，且产品本身已受欧盟现有法规的监管。', output: 'R4' },
+                    { text: '否，我的AI系统不是一个安全组件。', next: 'q2' }
+                ]
+            },
+            'q2': {
+                step: 5,
+                q: '您的AI系统是否将用于以下场景？',
+                options: [
+                    { text: '生物特征识别： 非实时的远程生物识别，或用于非工作/教育场景的情绪/情感识别（如：穿戴设备识别情绪波动，并提供调整建议）', output: 'R4' },
+                    { text: '关键基建： 管理水、电、气、交通等基础设施的数字化组件（如：AI控制的交通信号灯）。', output: 'R4' },
+                    { text: '教育/职业培训：决定谁能入学、分配班级，或评估学生考试成绩等', output: 'R4' },
+                    { text: '招聘及用工：筛选简历、评估面试表现，或用于分配任务、监控员工绩效', output: 'R4' },
+                    { text: '公共服务/福利： 评估谁有资格获得低保、医保，或进行信用评分', output: 'R4' },
+                    { text: '执法/司法/移民： 协助警察评估证据、测谎，或用于签证/庇护申请的审核', output: 'R4' },
+                    { text: '否，我的AI系统不会运用在如上任意场景中', next: 'q3' }
+                ]
+            },
+            'q3': {
+                step: 6,
+                q: '您的系统是否涉及以下功能？',
+                options: [
+                    { text: '人机交互： 聊天机器人（Chatbot）、智能客服、虚拟伴侣', output: 'R5' },
+                    { text: '合成内容（AIGC）： 生成图像、视频、音频（Deepfake），或生成新闻文章、创意文本', output: 'R5' },
+                    { text: '否，我的系统不包括这些功能', output: 'R6' }
+                ]
+            }
+        };
+
+        const OUTPUTS = {
+            'R1': '本法案仅对进入欧盟的AI系统/AI产品进行规范，暂不适用您的场景。\n但建议您将其作为全球合规基准参考，为您未来进入全球市场奠定技术合规的基础。',
+            'R2': '您的产品/服务可能涉及EU AI Act中所定义的“禁止性AI实践”，此类服务/产品在欧盟被严格禁止，请立即修改产品/服务定义',
+            'R3': '您的服务很大可能属于通用您的产品AI模型，可以投放市场，但必须依照欧盟《人工智能法案》(EU AI Act)的要求履行技术文档、数据版权合规等义务;若您的模型被认为具有系统性风险，还需履行模型评估、报告严重事件等额外义务。',
+            'R4': '您的AI系统很大可能属于高风险人工智能系统，可以投放市场，但须按照欧盟《人工智能法案》（EU AI Act）的要求履行质量管理体系、风险管理体系、数据治理、人类监督、网络安全等多项合规义务（详见EU AI Act Article 9-Article 15）。\n\nTÜV莱茵提供覆盖全产品周期战略合规解决方案，通过合规前置，在产品定义与架构评估阶段协助企业精准界定AI风险等级，有效规避风险，助您在保障产品安全可靠的前提下，以最优合规成本和最快上市速度，稳健锁定欧盟市场AI产品的准入资格。',
+            'R5': '您的AI系统很大可能属于有限风险的人工智能系统，需要遵循透明度义务，即明确标识“由AI生成”或“正在与AI对话”，并添加数字水印。\n关于透明度义务声明的细节要求，可联系TÜV莱茵免费咨询。',
+            'R6': '恭喜您！您的AI系统很大可能属于最小风险AI，受到的监管限制较少，建议您可以自愿签署透明度义务声明/告知，展示企业的合规责任感。\n同时，您可查阅TÜV莱茵AI合规义务矩阵，从数据、网络、隐私安全等维度全方位梳理合规风险。'
+        };
+
+        // ==========================================
+        // 2. 状态机逻辑
+        // ==========================================
+        let historyStack = [];
+        let currentOutput = null;
+        let selectedOption = null;
+
+        const greetingView = document.getElementById('greeting-view');
+        const consoleContainer = document.getElementById('console-container');
+        const confirmContainer = document.getElementById('confirm-container');
+        const btnConfirm = document.getElementById('btn-confirm');
+
+        btnConfirm.onclick = () => {
+            if (selectedOption) {
+                triggerScanAndProceed(selectedOption);
+            }
+        };
+        const questionView = document.getElementById('question-view');
+        const optionsContainer = document.getElementById('options-container');
+        const resultView = document.getElementById('result-view');
+        const btnBack = document.getElementById('btn-back');
+        const stepIndicator = document.getElementById('step-indicator');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const outputText = document.getElementById('output-text');
+        const resultLabel = document.getElementById('result-label');
+        const scannerLine = document.getElementById('scanner');
+        const processingText = document.getElementById('processing-text');
+
+        function formatItalicEmphasis(text) {
+            const regex = /(高风险人工智能系统|通用AI模型|有限风险的人工智能系统|最小风险AI|禁止性AI实践|安全组件|高风险|最小风险|有限风险)/g;
+            let formatted = text.replace(regex, '<span class="risk-italic">$1</span>');
+            return formatted.replace(/\n/g, '<br>');
+        }
+
+        function renderCurrentState() {
+            if (historyStack.length === 0 && !currentOutput) {
+                greetingView.style.display = 'flex';
+                consoleContainer.style.display = 'none';
+                resultView.style.display = 'none';
+
+                gsap.fromTo(greetingView,
+                    { opacity: 0, scale: 0.98 },
+                    { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }
+                );
+            } else if (currentOutput) {
+                renderOutput();
+            } else {
+                renderNode();
+            }
+        }
+
+        function startDiagnostic() {
+            gsap.to(greetingView, {
+                opacity: 0, scale: 0.98, duration: 0.3, ease: 'power2.in', onComplete: () => {
+                    historyStack = ['filter1'];
+                    greetingView.style.display = 'none';
+                    greetingView.style.opacity = 1;
+                    greetingView.style.transform = 'scale(1)';
+                    renderCurrentState();
+                }
+            });
+        }
+
+        function renderNode() {
+            const nodeId = historyStack[historyStack.length - 1];
+            const node = TRIAGE_NODES[nodeId];
+
+            btnBack.disabled = historyStack.length === 1;
+            stepIndicator.innerHTML = `NODE_0${node.step} / 06 <span class="w-1.5 h-3 bg-tuvBlue animate-pulse inline-block align-middle ml-1"></span>`;
+            progressBar.style.width = `${(node.step / 6) * 100}%`;
+
+            questionText.innerHTML = node.q.replace(/\n/g, '<br>');
+
+            optionsContainer.innerHTML = '';
+            // 重置内部滚动条
+            optionsContainer.scrollTop = 0;
+            selectedOption = null;
+            confirmContainer.classList.add('hidden');
+
+            node.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'spotlight-card px-4 md:px-5 py-3 md:py-4 cursor-pointer focus:outline-none text-left flex items-center group shrink-0 transition-all';
+                btn.innerHTML = `
+                    <span class="bracket left hidden md:inline-block">[</span>
+                    <span class="font-sans text-[14px] md:text-[15px] text-charcoal leading-snug z-10 w-full pr-6">${opt.text}</span>
+                    <div class="absolute right-3 md:right-4 w-5 h-5 shrink-0 border border-tuvBlue/30 flex items-center justify-center text-tuvBlue opacity-0 group-[.active-selected]:opacity-100 group-hover:opacity-100 transition-opacity z-10 bg-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                    <span class="bracket right hidden md:inline-block">]</span>
+                `;
+                btn.onclick = () => {
+                    Array.from(optionsContainer.children).forEach(child => child.classList.remove('active-selected'));
+                    btn.classList.add('active-selected');
+                    selectedOption = opt;
+
+                    if (confirmContainer.classList.contains('hidden')) {
+                        confirmContainer.classList.remove('hidden');
+                        gsap.fromTo(confirmContainer,
+                            { opacity: 0, y: 10 },
+                            { opacity: 1, y: 0, duration: 0.3 }
+                        );
+                    }
+                };
+                optionsContainer.appendChild(btn);
+            });
+
+            greetingView.style.display = 'none';
+            resultView.style.display = 'none';
+            consoleContainer.style.display = 'flex';
+
+            gsap.fromTo([questionView, optionsContainer.children],
+                { opacity: 0, x: -10 },
+                { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
+            );
+        }
+
+        function triggerScanAndProceed(opt) {
+            consoleContainer.style.pointerEvents = 'none';
+            processingText.classList.remove('hidden');
+
+            gsap.fromTo(scannerLine,
+                { opacity: 0.8, y: "-100%" },
+                {
+                    opacity: 0.8, y: "200%", duration: 0.6, ease: "linear", onComplete: () => {
+                        processingText.classList.add('hidden');
+                        consoleContainer.style.pointerEvents = 'auto';
+                        proceedToNext(opt);
+                    }
+                }
+            );
+        }
+
+        function proceedToNext(opt) {
+            gsap.to(consoleContainer, {
+                opacity: 0, scale: 0.98, duration: 0.2, ease: 'power2.in', onComplete: () => {
+                    if (opt.output) {
+                        currentOutput = opt.output;
+                    } else if (opt.next) {
+                        historyStack.push(opt.next);
+                    }
+                    consoleContainer.style.opacity = 1;
+                    consoleContainer.style.transform = 'scale(1)';
+                    renderCurrentState();
+                }
+            });
+        }
+
+        function renderOutput() {
+            consoleContainer.style.display = 'none';
+            resultView.style.display = 'flex';
+
+            resultLabel.textContent = `[ 测试结果 ]`;
+            outputText.innerHTML = formatItalicEmphasis(OUTPUTS[currentOutput]);
+
+            gsap.fromTo(resultView,
+                { opacity: 0, scale: 0.98 },
+                { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }
+            );
+        }
+
+        function goBack() {
+            if (historyStack.length > 1) {
+                gsap.to(consoleContainer, {
+                    opacity: 0, x: 20, duration: 0.2, ease: 'power2.in', onComplete: () => {
+                        historyStack.pop();
+                        currentOutput = null;
+                        consoleContainer.style.opacity = 1;
+                        consoleContainer.style.transform = 'translateX(0)';
+                        renderCurrentState();
+                    }
+                });
+            }
+        }
+
+        function resetEngine() {
+            gsap.to([consoleContainer, resultView], {
+                opacity: 0, duration: 0.3, onComplete: () => {
+                    historyStack = [];
+                    currentOutput = null;
+                    consoleContainer.style.opacity = 1;
+                    resultView.style.opacity = 1;
+                    renderCurrentState();
+                }
+            });
+        }
+
+        function copyResult() {
+            navigator.clipboard.writeText(OUTPUTS[currentOutput]).then(() => {
+                alert('DATA COPIED TO CLIPBOARD');
+            });
+        }
+
+        // ==========================================
+        // 3. 初始化与氛围数据
+        // ==========================================
+        renderCurrentState();
+
+        const hashEl = document.getElementById('live-hash');
+        setInterval(() => {
+            const randomHash = Math.random().toString(16).substr(2, 6).toUpperCase();
+            if (hashEl) hashEl.innerText = `HASH: 0x${randomHash}`;
+        }, 1500);
+    </script>
+</body>
+
+</html>
