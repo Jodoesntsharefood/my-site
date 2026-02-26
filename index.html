@@ -235,17 +235,7 @@
             }
         }
 
-        /* 7. 扫描光束叠加层 */
-        .scanner-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, transparent, rgba(0, 194, 255, 0.1) 50%, #00C2FF 50%, transparent 51%);
-            background-size: 100% 200%;
-            z-index: 50;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(-100%);
-        }
+
 
         /* 强调斜体 */
         .risk-italic {
@@ -350,7 +340,7 @@
 
             <div class="instrument-crosshairs hidden md:block"></div>
             <div class="instrument-crosshairs-bottom hidden md:block"></div>
-            <div id="scanner" class="scanner-overlay rounded-[1.5rem] md:rounded-[2rem]"></div>
+
 
             <div class="relative z-10 flex flex-col h-full p-4 md:p-10">
 
@@ -604,7 +594,7 @@
 
         btnConfirm.onclick = () => {
             if (selectedOption) {
-                triggerScanAndProceed(selectedOption);
+                proceedToNext(selectedOption);
             }
         };
         const questionView = document.getElementById('question-view');
@@ -616,7 +606,6 @@
         const questionText = document.getElementById('question-text');
         const outputText = document.getElementById('output-text');
         const resultLabel = document.getElementById('result-label');
-        const scannerLine = document.getElementById('scanner');
         const processingText = document.getElementById('processing-text');
 
         function formatItalicEmphasis(text) {
@@ -686,7 +675,7 @@
                     btn.classList.add('active-selected');
                     selectedOption = opt;
 
-                    triggerScanAndProceed(selectedOption);
+                    proceedToNext(selectedOption);
                 };
                 optionsContainer.appendChild(btn);
             });
@@ -701,21 +690,7 @@
             );
         }
 
-        function triggerScanAndProceed(opt) {
-            consoleContainer.style.pointerEvents = 'none';
-            processingText.classList.remove('hidden');
 
-            gsap.fromTo(scannerLine,
-                { opacity: 0.8, y: "-100%" },
-                {
-                    opacity: 0.8, y: "200%", duration: 0.6, ease: "linear", onComplete: () => {
-                        processingText.classList.add('hidden');
-                        consoleContainer.style.pointerEvents = 'auto';
-                        proceedToNext(opt);
-                    }
-                }
-            );
-        }
 
         function proceedToNext(opt) {
             gsap.to(consoleContainer, {
