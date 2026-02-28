@@ -271,7 +271,7 @@
             <div
                 class="hidden md:flex ml-4 pl-4 border-l border-tuvBlue/20 font-mono text-[10px] text-tuvBlue/80 flex-col leading-tight">
                 <span>TÜV Rheinland</span>
-                <span>Official Assessment Tool</span>
+                <span>Risk-Rating-Tool</span>
             </div>
         </div>
         <button onclick="resetEngine()"
@@ -377,18 +377,17 @@
                     ANALYZING VECTOR DATA...
                 </div>
 
-                <!-- 题目展示区 -->
-                <div id="question-view" class="mb-4 md:mb-6 shrink-0">
-                    <h2 id="question-text"
-                        class="font-display text-[17px] md:text-2xl text-charcoal font-semibold leading-relaxed tracking-tight">
-                        <!-- 题目动态注入 -->
-                    </h2>
-                </div>
-
-                <!-- 选项交互区 (内部滚动) -->
+                <!-- 题目和选项交互区 (共同滚动) -->
                 <div id="options-container"
                     class="flex-1 flex flex-col gap-3 custom-scrollbar px-3 -mx-3 pt-2 relative z-20 pb-6">
-                    <!-- 选项卡片动态注入 -->
+                    <!-- 题目展示区 -->
+                    <div id="question-view" class="mb-4 md:mb-6 shrink-0 mt-2">
+                        <h2 id="question-text"
+                            class="font-display text-[17px] md:text-2xl text-charcoal font-semibold leading-relaxed tracking-tight">
+                            <!-- 题目动态注入 -->
+                        </h2>
+                    </div>
+                    <!-- 选项卡片动态注入在这个容器末尾 -->
                 </div>
 
                 <!-- 确认按钮区 -->
@@ -645,7 +644,12 @@
 
             questionText.innerHTML = node.q.replace(/\n/g, '<br>');
 
-            optionsContainer.innerHTML = '';
+            // 清除旧选项（保留问题区域）
+            Array.from(optionsContainer.children).forEach(child => {
+                if (child.id !== 'question-view') {
+                    child.remove();
+                }
+            });
             // 重置内部滚动条
             optionsContainer.scrollTop = 0;
             selectedOption = null;
@@ -676,7 +680,7 @@
             resultView.style.display = 'none';
             consoleContainer.style.display = 'flex';
 
-            gsap.fromTo([questionView, optionsContainer.children],
+            gsap.fromTo(optionsContainer.children,
                 { opacity: 0, x: -10 },
                 { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
             );
