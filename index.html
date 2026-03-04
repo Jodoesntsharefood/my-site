@@ -45,7 +45,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <style>
-        /* 锁定全局滚动 */
+        /* ================= 基础配置与全局背景 ================= */
+        /* 强制防止整个页面的横向滚动 */
         body,
         html {
             background-color: var(--appleBg);
@@ -58,32 +59,25 @@
             padding: 0;
         }
 
-        /* 1. 科技数据网格背景 */
         .tech-grid {
             position: fixed;
             inset: 0;
             background-size: 40px 40px;
-            background-image:
-                linear-gradient(to right, rgba(0, 113, 185, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 113, 185, 0.03) 1px, transparent 1px);
+            background-image: linear-gradient(to right, rgba(0, 113, 185, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 113, 185, 0.03) 1px, transparent 1px);
             z-index: 0;
             pointer-events: none;
             mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
             -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
         }
 
-        /* 2. 弥散光背景 */
         .hero-mesh-bg {
             position: fixed;
             inset: 0;
-            background-image:
-                radial-gradient(at 20% 0%, rgba(0, 113, 185, 0.06) 0px, transparent 40%),
-                radial-gradient(at 80% 100%, rgba(0, 194, 255, 0.08) 0px, transparent 40%);
+            background-image: radial-gradient(at 20% 0%, rgba(0, 113, 185, 0.06) 0px, transparent 40%), radial-gradient(at 80% 100%, rgba(0, 194, 255, 0.08) 0px, transparent 40%);
             z-index: 0;
             pointer-events: none;
         }
 
-        /* 3. 面板内部自定义滚动条 (隐藏滚动条但保留功能) */
         .custom-scrollbar {
             overflow-y: auto;
             scrollbar-width: thin;
@@ -103,12 +97,13 @@
             border-radius: 4px;
         }
 
-        /* 4. 精密仪器面板 (四角准星特效) */
+        /* ================= 面板与修饰 ================= */
         .instrument-panel {
             position: relative;
         }
 
-        .instrument-crosshairs {
+        .instrument-crosshairs,
+        .instrument-crosshairs-bottom {
             position: absolute;
             inset: 1rem;
             pointer-events: none;
@@ -138,13 +133,6 @@
             right: 0;
         }
 
-        .instrument-crosshairs-bottom {
-            position: absolute;
-            inset: 1rem;
-            pointer-events: none;
-            z-index: 20;
-        }
-
         .instrument-crosshairs-bottom::before {
             bottom: 0;
             left: 0;
@@ -155,7 +143,6 @@
             right: 0;
         }
 
-        /* 5. 选项卡片科技 Hover 特效 */
         .spotlight-card {
             position: relative;
             background: rgba(255, 255, 255, 0.6);
@@ -187,7 +174,8 @@
             transform: translate(5px, -50%);
         }
 
-        .spotlight-card:hover {
+        .spotlight-card:hover,
+        .spotlight-card.active-selected {
             background: #ffffff;
             border-color: rgba(0, 113, 185, 0.4);
             box-shadow: 0 8px 20px -6px rgba(0, 113, 185, 0.25), 0 0 0 1px rgba(0, 113, 185, 0.4);
@@ -197,28 +185,17 @@
             z-index: 10;
         }
 
-        .spotlight-card:hover .bracket {
-            opacity: 1;
-            transform: translate(0, -50%);
-            font-weight: bold;
-        }
-
         .spotlight-card.active-selected {
-            background: #ffffff;
-            border-color: rgba(0, 113, 185, 0.4);
             box-shadow: 0 4px 15px -4px rgba(0, 113, 185, 0.3), inset 0 0 0 2px rgba(0, 113, 185, 0.2);
-            padding-left: 2rem !important;
-            padding-right: 2rem !important;
-            z-index: 10;
         }
 
+        .spotlight-card:hover .bracket,
         .spotlight-card.active-selected .bracket {
             opacity: 1;
             transform: translate(0, -50%);
             font-weight: bold;
         }
 
-        /* 6. 动态条纹进度条 */
         .progress-stripes {
             background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
             background-size: 1rem 1rem;
@@ -235,9 +212,6 @@
             }
         }
 
-
-
-        /* 强调斜体 */
         .risk-italic {
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
@@ -259,7 +233,7 @@
     <div class="tech-grid"></div>
     <div class="hero-mesh-bg"></div>
 
-    <!-- 顶部状态栏 (高度固定) -->
+    <!-- 顶部状态栏 -->
     <header
         class="relative z-20 h-16 w-full flex items-center justify-between px-6 border-b border-tuvBlue/10 bg-white/40 backdrop-blur-md">
         <div class="flex items-center gap-4">
@@ -285,66 +259,61 @@
         </button>
     </header>
 
-    <!-- 中央交互区 (自适应填充剩余空间) -->
+    <!-- 中央交互区 (增加 overflow-hidden 防止整体溢出) -->
     <main class="relative z-10 flex-1 flex items-center justify-center p-4 md:p-8 overflow-hidden">
 
-        <!-- 欢迎控制台面板 -->
+        <!-- 1. 欢迎控制台面板 -->
         <div id="greeting-view"
             class="instrument-panel w-full max-w-5xl h-full max-h-[90vh] bg-white/80 backdrop-blur-3xl border border-white rounded-[1.5rem] md:rounded-[2rem] shadow-tech flex flex-col transition-all duration-300">
-
             <div class="instrument-crosshairs"></div>
             <div class="instrument-crosshairs-bottom"></div>
-
             <div class="relative z-10 flex flex-col h-full items-center justify-center p-8 md:p-12 text-center">
-                <div class="mb-8 relative">
-                    <div class="absolute inset-0 bg-techCyan/10 blur-xl rounded-full"></div>
-                    <svg class="w-20 h-20 text-tuvBlue relative z-10 mx-auto" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                        <path d="m9 12 2 2 4-4"></path>
-                    </svg>
-                </div>
-
-                <h1 class="font-display text-2xl md:text-5xl text-charcoal font-bold tracking-tight mb-4 md:mb-6 px-4">
-                    EU AI Act 风险定级工具
-                </h1>
-
-                <p
-                    class="font-sans text-[14px] md:text-lg text-charcoal/70 leading-relaxed max-w-3xl mb-8 md:mb-12 px-2">
-                    欢迎使用 TÜV Rheinland AI 风险定级工具。本工具将通过一系列专业预审问题，<br class="hidden md:block">
-                    快速帮助您评估 AI 产品或服务在《欧盟人工智能法案》下的合规风险等级，并提供针对性的建议方案。
-                </p>
-
-                <button onclick="startDiagnostic()"
-                    class="group relative px-8 py-4 bg-tuvBlue text-white font-mono font-bold tracking-widest text-sm uppercase rounded shadow-[0_4px_15px_rgba(0,113,185,0.3)] hover:bg-tuvBlueLight hover:-translate-y-1 transition-all overflow-hidden">
-                    <div
-                        class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    </div>
-                    <div class="relative z-10 flex items-center gap-3">
-                        开始测试
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14"></path>
-                            <path d="m12 5 7 7-7 7"></path>
+                <div class="flex-1 flex flex-col items-center justify-center w-full">
+                    <div class="mb-8 relative">
+                        <div class="absolute inset-0 bg-techCyan/10 blur-xl rounded-full"></div>
+                        <svg class="w-20 h-20 text-tuvBlue relative z-10 mx-auto" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                            <path d="m9 12 2 2 4-4"></path>
                         </svg>
                     </div>
-                </button>
+                    <h1
+                        class="font-display text-2xl md:text-5xl text-charcoal font-bold tracking-tight mb-4 md:mb-6 px-4">
+                        EU AI Act 风险定级工具</h1>
+                    <p
+                        class="font-sans text-[14px] md:text-base text-charcoal/70 leading-relaxed max-w-2xl mb-6 md:mb-8 px-2 text-center">
+                        欢迎使用 TÜV Rheinland AI 风险定级工具。本工具将通过一系列专业预审问题，快速帮助您评估 AI 产品或服务在《欧盟人工智能法案》下的合规风险等级，并提供针对性的建议方案。
+                    </p>
+                    <button onclick="startDiagnostic()"
+                        class="group relative px-8 py-4 bg-tuvBlue text-white font-mono font-bold tracking-widest text-sm uppercase rounded shadow-[0_4px_15px_rgba(0,113,185,0.3)] hover:bg-tuvBlueLight hover:-translate-y-1 transition-all overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        </div>
+                        <div class="relative z-10 flex items-center gap-3">开始测试 <svg
+                                class="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14"></path>
+                                <path d="m12 5 7 7-7 7"></path>
+                            </svg></div>
+                    </button>
+                </div>
+                <!-- 严格保留的底部免责小字 -->
+                <div class="shrink-0 mt-8 text-center">
+                    <p class="font-mono text-[10px] text-charcoal/40 tracking-wide">评估结果仅供参考，不构成法律意见，最终定级需专家评估。</p>
+                    <p class="mt-1 font-mono text-[10px] text-charcoal/40 tracking-wide">&copy; 2026 TÜV Rheinland. All
+                        rights reserved.</p>
+                </div>
             </div>
         </div>
 
-        <!-- 问题控制台面板 -->
+        <!-- 2. 问题控制台面板 -->
         <div id="console-container"
             class="instrument-panel w-full max-w-5xl h-full max-h-[90vh] bg-white/80 backdrop-blur-3xl border border-white rounded-[1.5rem] md:rounded-[2rem] shadow-tech hidden flex flex-col transition-all duration-300">
-
             <div class="instrument-crosshairs hidden md:block"></div>
             <div class="instrument-crosshairs-bottom hidden md:block"></div>
-
-
             <div class="relative z-10 flex flex-col h-full p-4 md:p-10">
-
-                <!-- 顶部进度与控制 -->
                 <div
                     class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0 border-b border-tuvBlue/10 pb-6">
                     <div class="flex items-center gap-4">
@@ -354,141 +323,97 @@
                                 fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="m12 19-7-7 7-7" />
                                 <path d="M19 12H5" />
-                            </svg>
-                            返回上一题
+                            </svg> 返回上一题
                         </button>
                     </div>
-
-                    <!-- 动态进度条 -->
                     <div class="w-full md:w-1/3 h-1.5 bg-tuvBlue/10 rounded-full overflow-hidden">
                         <div id="progress-bar"
                             class="h-full bg-tuvBlue progress-stripes shadow-[0_0_8px_#00C2FF] transition-all duration-500"
                             style="width: 16.6%;"></div>
                     </div>
                 </div>
-
-                <!-- 提示文字 -->
-                <div id="processing-text"
-                    class="hidden font-mono text-[10px] text-techCyan mb-2 flex items-center gap-2 shrink-0">
-                    <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                    </svg>
-                    ANALYZING VECTOR DATA...
-                </div>
-
-                <!-- 题目和选项交互区 (共同滚动) -->
                 <div id="options-container"
                     class="flex-1 flex flex-col gap-3 custom-scrollbar px-3 -mx-3 pt-2 relative z-20 pb-6">
-                    <!-- 题目展示区 -->
                     <div id="question-view" class="mb-4 md:mb-6 shrink-0 mt-2">
                         <h2 id="question-text"
                             class="font-display text-[17px] md:text-2xl text-charcoal font-semibold leading-relaxed tracking-tight">
-                            <!-- 题目动态注入 -->
                         </h2>
                     </div>
-                    <!-- 选项卡片动态注入在这个容器末尾 -->
-                </div>
-
-                <!-- 确认按钮区 -->
-                <div id="confirm-container"
-                    class="hidden shrink-0 flex justify-end pt-4 border-t border-tuvBlue/10 mt-2 relative z-20">
-                    <button id="btn-confirm"
-                        class="group relative px-8 py-3 bg-tuvBlue/10 border border-tuvBlue text-tuvBlue font-display font-bold tracking-widest uppercase overflow-hidden transition-all hover:bg-tuvBlue hover:text-white hover:shadow-[0_4px_15px_rgba(0,113,185,0.3)] rounded flex items-center gap-2">
-                        <span class="relative z-10 flex items-center gap-2">
-                            下一题
-                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2">
-                                <path d="M5 12h14" />
-                                <path d="m12 5 7 7-7 7" />
-                            </svg>
-                        </span>
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- 结果展示视图 (同等尺寸) -->
+        <!-- 3. 全新结果视图 (绝对杜绝横向滚动的布局) -->
         <div id="result-view"
             class="instrument-panel w-full max-w-5xl h-full max-h-[90vh] bg-white/90 backdrop-blur-3xl rounded-[1.5rem] md:rounded-[2rem] border border-tuvBlue/10 shadow-tech hidden flex-col">
             <div class="instrument-crosshairs hidden md:block"></div>
             <div class="instrument-crosshairs-bottom hidden md:block"></div>
 
-            <div class="relative z-10 flex flex-col h-full p-4 md:p-10">
-
-                <!-- 结果头部 -->
-                <div class="flex items-center gap-4 mb-6 shrink-0 border-b border-tuvBlue/10 pb-6">
+            <div class="relative z-10 flex flex-col h-full p-4 md:p-8 overflow-hidden">
+                <!-- 顶部控制条 -->
+                <div class="flex items-center gap-4 mb-2 shrink-0 border-b border-tuvBlue/10 pb-4">
                     <button onclick="goBackFromResult()"
                         class="flex items-center gap-2 px-3 py-1.5 rounded bg-tuvBlue/5 border border-tuvBlue/20 text-tuvBlue font-mono text-[11px] tracking-widest uppercase hover:bg-tuvBlue hover:text-white transition-all duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
                             <path d="m12 19-7-7 7-7" />
                             <path d="M19 12H5" />
-                        </svg>
-                        返回上一题
+                        </svg> 返回上一题
                     </button>
-                    <span id="result-label"
-                        class="ml-auto font-mono text-[10px] text-tuvBlue font-bold bg-tuvBlue/5 px-3 py-1.5 rounded border border-tuvBlue/20">OUTPUT</span>
+                    <!-- 测试结果文字 -->
+                    <span
+                        class="ml-auto font-mono text-[11px] text-tuvBlue font-bold bg-tuvBlue/5 px-3 py-1.5 rounded border border-tuvBlue/20 tracking-widest">[
+                        测试结果 ]</span>
                 </div>
 
-                <!-- 结果主体区 (可滚动) -->
-                <div class="flex-1 custom-scrollbar pr-2 flex flex-col gap-6">
-                    <!-- 输出文本 -->
-                    <div id="output-text"
-                        class="output-text font-sans text-charcoal text-[15px] md:text-lg leading-relaxed bg-[#F8F9FA]/80 p-6 md:p-8 rounded-xl border-l-[4px] border-tuvBlue shadow-inner">
-                        <!-- 结果文本动态注入 -->
+                <!-- 核心可滚动区 (强制 overflow-x-hidden 解决手机滑动问题) -->
+                <div class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar pt-2 pb-4 flex flex-col px-1">
+
+                    <!-- 上半部分：分屏 (左图像，右文字) -->
+                    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 w-full shrink-0">
+                        <!-- 左侧可视分析模型 -->
+                        <div id="result-visual-container"
+                            class="w-full lg:w-[48%] flex items-center justify-center min-h-[260px] lg:min-h-[340px] relative shrink-0">
+                            <!-- 动态生成的 3D SVG 代码将注入在此 -->
+                        </div>
+
+                        <!-- 右侧文本解析区 -->
+                        <div class="w-full lg:w-[52%] flex flex-col justify-center h-full pt-2 md:pt-0">
+                            <div id="output-text"
+                                class="output-text font-sans text-charcoal text-[14px] md:text-[15px] leading-relaxed bg-[#F8F9FA]/80 p-5 md:p-8 rounded-[1rem] md:rounded-[1.5rem] border border-tuvBlue/10 shadow-sm relative overflow-hidden">
+                                <!-- 装饰性左侧强调线 -->
+                                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-tuvBlue"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- 预留图片位置 (科技线框) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div
-                            class="border border-tuvBlue/20 bg-tuvBlue/5 h-40 flex flex-col items-center justify-center relative group transition-colors overflow-hidden rounded-xl">
-                            <div class="absolute top-0 left-0 w-6 h-6 border-t border-l border-tuvBlue/40 m-2"></div>
-                            <div class="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-tuvBlue/40 m-2">
-                            </div>
-                            <svg class="text-tuvBlue/40 mb-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" />
-                                <polyline points="14 2 14 8 20 8" />
-                                <path d="M2 15h10" />
-                                <path d="M6 12v6" />
-                                <path d="M10 12v6" />
+                    <!-- 下半部分：专属高风险专家联系卡片 (动态注入并显示在最下方) -->
+                    <div id="r4-extra-content" class="w-full hidden mt-6 shrink-0"></div>
+
+                    <!-- 底部操作按钮：位于内容的最下方，增加左右内边距防止贴边 -->
+                    <div class="shrink-0 flex items-center justify-between mt-8 w-full px-2 md:px-8">
+                        <button onclick="copyResult()"
+                            class="bg-tuvBlue text-white px-5 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded hover:bg-tuvBlueLight hover:-translate-y-0.5 transition-all shadow-[0_4px_10px_rgba(0,113,185,0.2)] flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                             </svg>
-                            <span class="font-mono text-[10px] text-tuvBlue/60 tracking-widest uppercase">Compliance
-                                Matrix 1</span>
-                        </div>
-                        <div
-                            class="border border-tuvBlue/20 bg-tuvBlue/5 h-40 flex flex-col items-center justify-center relative group transition-colors overflow-hidden rounded-xl">
-                            <div class="absolute top-0 left-0 w-6 h-6 border-t border-l border-tuvBlue/40 m-2"></div>
-                            <div class="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-tuvBlue/40 m-2">
-                            </div>
-                            <svg class="text-tuvBlue/40 mb-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <path d="M3 9h18" />
-                                <path d="M9 21V9" />
-                            </svg>
-                            <span class="font-mono text-[10px] text-tuvBlue/60 tracking-widest uppercase">Data Blueprint
-                                2</span>
-                        </div>
+                            拷贝结果
+                        </button>
+                        <button onclick="resetEngine()"
+                            class="bg-transparent text-tuvBlue border border-tuvBlue/30 px-5 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded hover:bg-tuvBlue/5 transition-all">
+                            重新测试
+                        </button>
                     </div>
+
                 </div>
 
-                <!-- 底部操作按钮 -->
-                <div class="shrink-0 flex flex-wrap items-center gap-3 pt-6 border-t border-tuvBlue/10 mt-4">
-                    <button onclick="resetEngine()"
-                        class="bg-tuvBlue text-white px-6 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded shadow-[0_4px_10px_rgba(0,113,185,0.2)] hover:bg-tuvBlueLight hover:-translate-y-0.5 transition-all">
-                        重新测试
-                    </button>
-                    <button onclick="copyResult()"
-                        class="bg-white text-tuvBlue border border-tuvBlue/30 px-6 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded hover:bg-tuvBlue/5 transition-all flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                        </svg>
-                        拷贝结果
-                    </button>
+                <!-- 严格保留的底部免责小字 -->
+                <div class="shrink-0 pt-4 mt-2 border-t border-tuvBlue/10 text-center">
+                    <p class="font-mono text-[10px] text-charcoal/40 tracking-wide">评估结果仅供参考，不构成法律意见，最终定级需专家评估。</p>
+                    <p class="mt-1 font-mono text-[10px] text-charcoal/40 tracking-wide">&copy; 2026 TÜV Rheinland. All
+                        rights reserved.</p>
                 </div>
             </div>
         </div>
@@ -496,7 +421,7 @@
 
     <script>
         // ==========================================
-        // 1. 数据源定义 (严格遵循 XMind)
+        // 1. 数据源定义 (100% 严格还原用户要求)
         // ==========================================
         const TRIAGE_NODES = {
             'filter1': {
@@ -532,7 +457,7 @@
             },
             'q1': {
                 step: 4,
-                q: '您的AI系统是否作为某产品的安全组件，且该产品本身受欧盟现有法规监管？\n\n<span class="text-sm text-charcoal/60">安全组件（safety component）定义：产品或人工智能系统中用于实现安全功能的组成部分；该组成部分一旦发生故障或失灵，可能危及人体健康与人身安全，或危及财产安全。\n\n示例： 自动驾驶汽车的避障算法、手术机器人的机械臂控制系统、电梯的紧急制动AI系统、工业机器人的安全围栏AI系统……等</span>',
+                q: '您的AI系统是否作为某产品的安全组件，且该产品本身受欧盟现有法规监管？\n\n<span class="text-sm text-charcoal/60">安全组件（safety component）定义：产品或人工智能系统中用于实现安全功能的组成部分；该组成部分一旦发生故障或失灵，可能危及人体健康与人身安全，或危及财产安全。\n\n示例： 自动驾驶汽车的避障算法、手术机器人的机械臂控制系统、电梯的紧急制动AI系统、工业机器人的安全围栏AI系统……</span>',
                 options: [
                     { text: '是，我的AI系统是一个安全组件，且产品本身已受欧盟现有法规的监管。', output: 'R4' },
                     { text: '否，我的AI系统不是一个安全组件。', next: 'q2' }
@@ -572,37 +497,26 @@
         };
 
         // ==========================================
-        // 2. 状态机逻辑
+        // 2. 状态机与核心逻辑
         // ==========================================
         let historyStack = [];
         let currentOutput = null;
-        let selectedOption = null;
 
         const greetingView = document.getElementById('greeting-view');
         const consoleContainer = document.getElementById('console-container');
-        const confirmContainer = document.getElementById('confirm-container');
-        const btnConfirm = document.getElementById('btn-confirm');
-
-        btnConfirm.onclick = () => {
-            if (selectedOption) {
-                proceedToNext(selectedOption);
-            }
-        };
-        const questionView = document.getElementById('question-view');
         const optionsContainer = document.getElementById('options-container');
         const resultView = document.getElementById('result-view');
         const btnBack = document.getElementById('btn-back');
-        const stepIndicator = document.getElementById('step-indicator');
         const progressBar = document.getElementById('progress-bar');
         const questionText = document.getElementById('question-text');
         const outputText = document.getElementById('output-text');
-        const resultLabel = document.getElementById('result-label');
-        const processingText = document.getElementById('processing-text');
+        const resultVisualContainer = document.getElementById('result-visual-container');
+        const r4ExtraContainer = document.getElementById('r4-extra-content');
 
         function formatItalicEmphasis(text) {
             const regex = /(高风险人工智能系统|通用AI模型|有限风险的人工智能系统|最小风险AI|禁止性AI实践|安全组件|高风险|最小风险|有限风险)/g;
             let formatted = text.replace(regex, '<span class="risk-italic">$1</span>');
-            return formatted.replace(/\n/g, '<br>');
+            return formatted.replace(/\n/g, '<br>'); // 精准保留原版换行
         }
 
         function renderCurrentState() {
@@ -610,11 +524,7 @@
                 greetingView.style.display = 'flex';
                 consoleContainer.style.display = 'none';
                 resultView.style.display = 'none';
-
-                gsap.fromTo(greetingView,
-                    { opacity: 0, scale: 0.98 },
-                    { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }
-                );
+                gsap.fromTo(greetingView, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
             } else if (currentOutput) {
                 renderOutput();
             } else {
@@ -626,9 +536,7 @@
             gsap.to(greetingView, {
                 opacity: 0, scale: 0.98, duration: 0.3, ease: 'power2.in', onComplete: () => {
                     historyStack = ['filter1'];
-                    greetingView.style.display = 'none';
-                    greetingView.style.opacity = 1;
-                    greetingView.style.transform = 'scale(1)';
+                    greetingView.style.display = 'none'; greetingView.style.opacity = 1; greetingView.style.transform = 'scale(1)';
                     renderCurrentState();
                 }
             });
@@ -639,28 +547,18 @@
             const node = TRIAGE_NODES[nodeId];
 
             btnBack.disabled = historyStack.length === 1;
-            // stepIndicator.innerHTML = `NODE_0${node.step} / 06 <span class="w-1.5 h-3 bg-tuvBlue animate-pulse inline-block align-middle ml-1"></span>`;
             progressBar.style.width = `${(node.step / 6) * 100}%`;
-
             questionText.innerHTML = node.q.replace(/\n/g, '<br>');
 
-            // 清除旧选项（保留问题区域）
-            Array.from(optionsContainer.children).forEach(child => {
-                if (child.id !== 'question-view') {
-                    child.remove();
-                }
-            });
-            // 重置内部滚动条
+            Array.from(optionsContainer.children).forEach(child => { if (child.id !== 'question-view') child.remove(); });
             optionsContainer.scrollTop = 0;
-            selectedOption = null;
-            confirmContainer.classList.add('hidden');
 
             node.options.forEach((opt) => {
                 const btn = document.createElement('button');
                 btn.className = 'spotlight-card px-4 md:px-5 py-3 md:py-4 cursor-pointer focus:outline-none text-left flex items-center group shrink-0 transition-all';
                 btn.innerHTML = `
                     <span class="bracket left hidden md:inline-block">[</span>
-                    <span class="font-sans text-[14px] md:text-[15px] text-charcoal leading-snug z-10 w-full pr-6">${opt.text}</span>
+                    <span class="font-sans text-[13px] md:text-[15px] text-charcoal leading-snug z-10 w-full pr-6">${opt.text}</span>
                     <div class="absolute right-3 md:right-4 w-5 h-5 shrink-0 border border-tuvBlue/30 flex items-center justify-center text-tuvBlue opacity-0 group-[.active-selected]:opacity-100 group-hover:opacity-100 transition-opacity z-10 bg-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
@@ -669,35 +567,21 @@
                 btn.onclick = () => {
                     Array.from(optionsContainer.children).forEach(child => child.classList.remove('active-selected'));
                     btn.classList.add('active-selected');
-                    selectedOption = opt;
-
-                    proceedToNext(selectedOption);
+                    proceedToNext(opt); // 免确认，直接进入下一步
                 };
                 optionsContainer.appendChild(btn);
             });
 
-            greetingView.style.display = 'none';
-            resultView.style.display = 'none';
-            consoleContainer.style.display = 'flex';
-
-            gsap.fromTo(optionsContainer.children,
-                { opacity: 0, x: -10 },
-                { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' }
-            );
+            greetingView.style.display = 'none'; resultView.style.display = 'none'; consoleContainer.style.display = 'flex';
+            gsap.fromTo(optionsContainer.children, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' });
         }
-
-
 
         function proceedToNext(opt) {
             gsap.to(consoleContainer, {
                 opacity: 0, scale: 0.98, duration: 0.2, ease: 'power2.in', onComplete: () => {
-                    if (opt.output) {
-                        currentOutput = opt.output;
-                    } else if (opt.next) {
-                        historyStack.push(opt.next);
-                    }
-                    consoleContainer.style.opacity = 1;
-                    consoleContainer.style.transform = 'scale(1)';
+                    if (opt.output) currentOutput = opt.output;
+                    else if (opt.next) historyStack.push(opt.next);
+                    consoleContainer.style.opacity = 1; consoleContainer.style.transform = 'scale(1)';
                     renderCurrentState();
                 }
             });
@@ -707,23 +591,241 @@
             consoleContainer.style.display = 'none';
             resultView.style.display = 'flex';
 
-            resultLabel.textContent = `[ 测试结果 ]`;
+            let visualHTML = '';
+
+            // =====================================
+            // 纯SVG数学等距透视金字塔 (45度水平视角模拟) 
+            // =====================================
+            if (['R2', 'R4', 'R5', 'R6'].includes(currentOutput)) {
+
+                const TIERS = [
+                    { name: '禁止性AI实践', colorLeft: '#00263E', colorRight: '#003B60', activeOut: 'R2' },
+                    { name: '高风险人工智能系统', colorLeft: '#004068', colorRight: '#005a93', activeOut: 'R4' },
+                    { name: '有限风险的人工智能系统', colorLeft: '#005387', colorRight: '#0071B9', activeOut: 'R5' },
+                    { name: '最小风险AI', colorLeft: '#327ba8', colorRight: '#4aa0db', activeOut: 'R6' }
+                ];
+
+                let t = 0; // 进度
+                let svgContent = '';
+
+                TIERS.forEach((tier) => {
+                    let isActive = (tier.activeOut === currentOutput);
+                    let size = isActive ? 0.55 : 0.15;
+                    let t1 = t;
+                    let t2 = t + size;
+                    t = t2; // 为下一层递进
+
+                    const X_CENTER = 130;
+                    const DX = 100;
+                    const DY_MID = 240;
+                    const DY_EDGE = 180;
+                    const Y_BASE = 20;
+
+                    let pt1 = `${X_CENTER},${Y_BASE + DY_MID * t1}`;
+                    let pl2 = `${X_CENTER - DX * t1},${Y_BASE + DY_EDGE * t1}`;
+                    let pl3 = `${X_CENTER - DX * t2},${Y_BASE + DY_EDGE * t2}`;
+                    let pt4 = `${X_CENTER},${Y_BASE + DY_MID * t2}`;
+
+                    let pr2 = `${X_CENTER + DX * t1},${Y_BASE + DY_EDGE * t1}`;
+                    let pr3 = `${X_CENTER + DX * t2},${Y_BASE + DY_EDGE * t2}`;
+
+                    let faceLeft = `<polygon points="${pt1} ${pl2} ${pl3} ${pt4}" fill="${tier.colorLeft}" stroke="rgba(255,255,255,0.15)" stroke-width="0.5" stroke-linejoin="round" />`;
+                    let faceRight = `<polygon points="${pt1} ${pr2} ${pr3} ${pt4}" fill="${tier.colorRight}" stroke="rgba(255,255,255,0.15)" stroke-width="0.5" stroke-linejoin="round" />`;
+
+                    let avgX = X_CENTER + (DX * t1 + DX * t2) / 4;
+                    let avgY = Y_BASE + (DY_MID * t1 + DY_EDGE * t1 + DY_EDGE * t2 + DY_MID * t2) / 4;
+
+                    let jointX = avgX + 25;
+                    let jointY = avgY - 10;
+                    let endX = 265;
+
+                    let callout = `
+                        <polyline points="${avgX},${avgY} ${jointX},${jointY} ${endX},${jointY}" fill="none" stroke="${isActive ? tier.colorRight : 'rgba(0,113,185,0.2)'}" stroke-width="${isActive ? 2 : 1.5}" />
+                        <circle cx="${avgX}" cy="${avgY}" r="${isActive ? 3.5 : 2}" fill="${isActive ? '#fff' : tier.colorRight}" stroke="${tier.colorRight}" stroke-width="${isActive ? 2 : 0}" />
+                        <circle cx="${endX}" cy="${jointY}" r="1.5" fill="${isActive ? tier.colorRight : 'rgba(0,113,185,0.5)'}" />
+                        <text x="${endX + 10}" y="${jointY + 1}" fill="${isActive ? tier.colorRight : '#86868b'}" font-size="${isActive ? '15' : '11.5'}" font-weight="${isActive ? '700' : '500'}" dominant-baseline="central" font-family="'Plus Jakarta Sans', sans-serif" letter-spacing="1">
+                            ${tier.name}
+                        </text>
+                    `;
+
+                    svgContent += `
+                        <g class="tier-layer" opacity="0" transform="translate(0, 20)">
+                            ${faceLeft}
+                            ${faceRight}
+                            ${isActive ? `<polygon points="${pt1} ${pr2} ${pr3} ${pt4}" fill="white" opacity="0.1" />` : ''} 
+                            ${callout}
+                        </g>
+                    `;
+                });
+
+                visualHTML = `
+                <div class="relative w-full h-full flex items-center justify-center p-4">
+                    <div class="absolute inset-0 bg-tuvBlue/5 blur-3xl rounded-full scale-110"></div>
+                    <!-- 确保SVG本身不会导致溢出 -->
+                    <svg viewBox="0 0 450 300" class="w-full max-w-full h-auto drop-shadow-xl overflow-visible z-10">
+                        ${svgContent}
+                    </svg>
+                </div>
+                `;
+            }
+            // =====================================
+            // 特殊状态 SVG 动画 (R1)
+            // =====================================
+            else if (currentOutput === 'R1') {
+                visualHTML = `
+                <div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center text-tuvBlue">
+                    <svg class="absolute inset-0 w-full h-full animate-[spin_20s_linear_infinite] opacity-30" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4"/>
+                        <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="5 5"/>
+                        <circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="0.5"/>
+                        <line x1="50" y1="2" x2="50" y2="98" stroke="currentColor" stroke-width="0.2" opacity="0.5"/>
+                        <line x1="2" y1="50" x2="98" y2="50" stroke="currentColor" stroke-width="0.2" opacity="0.5"/>
+                    </svg>
+                    <svg class="w-16 h-16 md:w-20 md:h-20 relative z-10 drop-shadow-[0_0_15px_rgba(0,113,185,0.4)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                    </svg>
+                    <div class="absolute w-3 h-3 bg-techCyan rounded-full top-[30%] left-[25%] animate-ping opacity-60"></div>
+                </div>`;
+            }
+            // =====================================
+            // 特殊状态 SVG 动画 (R3 - 悬浮晶体与全向星轨，去除六边形的跳动)
+            // =====================================
+            else if (currentOutput === 'R3') {
+                visualHTML = `
+                <div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center text-tuvBlue">
+                    <div class="absolute inset-0 bg-techCyan/10 blur-2xl rounded-full"></div>
+                    
+                    <!-- 多向交织的星轨 -->
+                    <svg class="absolute w-full h-full animate-[spin_25s_linear_infinite]" viewBox="0 0 100 100">
+                        <ellipse cx="50" cy="50" rx="45" ry="15" fill="none" stroke="currentColor" stroke-width="0.3" transform="rotate(30 50 50)" class="opacity-40" stroke-dasharray="4 4"/>
+                        <ellipse cx="50" cy="50" rx="45" ry="15" fill="none" stroke="currentColor" stroke-width="0.3" transform="rotate(-30 50 50)" class="opacity-50" stroke-dasharray="2 6"/>
+                        <ellipse cx="50" cy="50" rx="45" ry="15" fill="none" stroke="currentColor" stroke-width="0.2" transform="rotate(90 50 50)" class="opacity-30"/>
+                    </svg>
+
+                    <!-- 中心晶体神经元核心 (去除了 animate-[bounce_...]，保持静止悬浮) -->
+                    <div class="relative z-10 w-20 h-20 md:w-24 md:h-24 text-tuvBlue">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" class="drop-shadow-[0_0_15px_rgba(0,194,255,0.3)]">
+                            <!-- 晶体线框立体结构 -->
+                            <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="rgba(0,194,255,0.05)" stroke="#00C2FF" stroke-width="1"/>
+                            <polyline points="50,10 50,50 85,30" stroke="#00C2FF" opacity="0.6"/>
+                            <polyline points="50,50 85,70" stroke="#00C2FF" opacity="0.6"/>
+                            <polyline points="50,50 50,90" stroke="#00C2FF" opacity="0.6"/>
+                            <polyline points="50,50 15,70" stroke="#00C2FF" opacity="0.6"/>
+                            <polyline points="50,50 15,30" stroke="#00C2FF" opacity="0.6"/>
+                            <!-- 内部发光的 AI 奇点 -->
+                            <circle cx="50" cy="50" r="6" fill="#fff" class="animate-pulse" filter="drop-shadow(0 0 8px #00C2FF)"/>
+                            <!-- 周围连接节点 -->
+                            <circle cx="50" cy="10" r="2" fill="#00C2FF"/>
+                            <circle cx="85" cy="30" r="2" fill="#00C2FF"/>
+                            <circle cx="85" cy="70" r="2" fill="#00C2FF"/>
+                            <circle cx="50" cy="90" r="2" fill="#00C2FF"/>
+                            <circle cx="15" cy="70" r="2" fill="#00C2FF"/>
+                            <circle cx="15" cy="30" r="2" fill="#00C2FF"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- 漂浮的数据节点 -->
+                    <div class="absolute w-2 h-2 bg-techCyan rounded-full top-1/4 left-[15%] animate-ping opacity-60"></div>
+                    <div class="absolute w-1.5 h-1.5 bg-tuvBlue rounded-full bottom-1/3 right-[15%] animate-ping opacity-80" style="animation-delay: 1s;"></div>
+                </div>`;
+            }
+
+            // 更新DOM内容
+            resultVisualContainer.innerHTML = visualHTML;
             outputText.innerHTML = formatItalicEmphasis(OUTPUTS[currentOutput]);
 
-            gsap.fromTo(resultView,
-                { opacity: 0, scale: 0.98 },
-                { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }
-            );
+            // =====================================
+            // 专属高风险 (R4) 额外专家联系卡片展示逻辑 (横屏 Dashboard 布局)
+            // =====================================
+            if (currentOutput === 'R4') {
+                r4ExtraContainer.innerHTML = `
+                    <div class="w-full bg-white/70 border border-tuvBlue/15 rounded-[1.5rem] shadow-sm relative overflow-hidden flex flex-col md:flex-row gap-6 p-6">
+                        <!-- 装饰高光 -->
+                        <div class="absolute -right-8 -top-8 w-40 h-40 bg-tuvBlue/5 rounded-full blur-2xl pointer-events-none"></div>
+                        
+                        <!-- 左半部：文案介绍 -->
+                        <div class="flex-1 flex flex-col justify-center">
+                            <h4 class="text-tuvBlue font-bold text-[14px] md:text-base mb-3 flex items-center gap-2">
+                                <svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                TÜV莱茵电子电气产品服务
+                            </h4>
+                            <p class="text-[12px] md:text-[13px] text-charcoal/70 leading-relaxed text-justify">
+                                依托全球权威资质体系，面向显示、通信与智能终端等多领域产品，提供涵盖安全合规、能效、EMC、RF及信息与AI相关服务在内的全链条检测认证解决方案。
+                            </p>
+                        </div>
+                        
+                        <!-- 分割线 (PC端竖线，移动端横线) -->
+                        <div class="hidden md:block w-px bg-tuvBlue/10 self-stretch"></div>
+                        <div class="md:hidden h-px w-full bg-tuvBlue/10"></div>
+
+                        <!-- 右半部：联系方式与二维码 -->
+                        <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center shrink-0">
+                            <!-- 联系方式区 -->
+                            <div class="space-y-3">
+                                <div class="text-[10px] uppercase font-mono tracking-widest text-muted font-bold">Contact Us</div>
+                                <div class="flex items-center gap-3 text-[12px] text-charcoal">
+                                    <div class="w-7 h-7 rounded-full bg-tuvBlue/10 flex items-center justify-center text-tuvBlue shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    </div>
+                                    <span class="font-mono font-medium text-[13px]">400-883-1300<span class="text-charcoal/40 text-[10px] ml-1">(占位)</span></span>
+                                </div>
+                                <div class="flex items-center gap-3 text-[12px] text-charcoal">
+                                    <div class="w-7 h-7 rounded-full bg-tuvBlue/10 flex items-center justify-center text-tuvBlue shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                    </div>
+                                    <span class="font-mono font-medium text-[13px]">contact@tuv.com<span class="text-charcoal/40 text-[10px] ml-1">(占位)</span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- 二维码矩阵 -->
+                            <div class="flex gap-3 shrink-0">
+                                <div class="flex flex-col items-center gap-1.5">
+                                    <div class="w-[64px] h-[64px] bg-white border border-tuvBlue/20 rounded-md flex items-center justify-center p-1 shadow-sm">
+                                        <div class="w-full h-full border border-dashed border-tuvBlue/30 bg-tuvBlue/5 flex items-center justify-center text-[10px] text-tuvBlue/50 text-center leading-tight font-medium tracking-wide">公众号<br>二维码</div>
+                                    </div>
+                                    <span class="text-[9px] text-charcoal/60 tracking-wider font-medium">官方公众号</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1.5">
+                                    <div class="w-[64px] h-[64px] bg-white border border-tuvBlue/20 rounded-md flex items-center justify-center p-1 shadow-sm">
+                                        <div class="w-full h-full border border-dashed border-tuvBlue/30 bg-tuvBlue/5 flex items-center justify-center text-[10px] text-tuvBlue/50 text-center leading-tight font-medium tracking-wide">视频号<br>二维码</div>
+                                    </div>
+                                    <span class="text-[9px] text-charcoal/60 tracking-wider font-medium">官方视频号</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                r4ExtraContainer.classList.remove('hidden');
+                r4ExtraContainer.classList.add('block');
+            } else {
+                r4ExtraContainer.innerHTML = '';
+                r4ExtraContainer.classList.add('hidden');
+                r4ExtraContainer.classList.remove('block');
+            }
+
+            // 执行整体淡入动画
+            gsap.fromTo(resultView, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
+
+            // 针对 R4 额外卡片单独加入轻盈上浮入场动画
+            if (currentOutput === 'R4') {
+                gsap.fromTo(r4ExtraContainer, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, delay: 0.3, ease: 'power2.out' });
+            }
+
+            // 针对3D SVG阶层注入交错入场动画，营造数据扫描生成感
+            const tierLayers = document.querySelectorAll('.tier-layer');
+            if (tierLayers.length > 0) {
+                gsap.fromTo(tierLayers,
+                    { opacity: 0, y: 15 },
+                    { opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: 'back.out(1.2)', delay: 0.2 }
+                );
+            }
         }
 
         function goBack() {
             if (historyStack.length > 1) {
                 gsap.to(consoleContainer, {
                     opacity: 0, x: 20, duration: 0.2, ease: 'power2.in', onComplete: () => {
-                        historyStack.pop();
-                        currentOutput = null;
-                        consoleContainer.style.opacity = 1;
-                        consoleContainer.style.transform = 'translateX(0)';
+                        historyStack.pop(); currentOutput = null; consoleContainer.style.opacity = 1; consoleContainer.style.transform = 'translateX(0)';
                         renderCurrentState();
                     }
                 });
@@ -733,9 +835,7 @@
         function goBackFromResult() {
             gsap.to(resultView, {
                 opacity: 0, scale: 0.98, duration: 0.2, ease: 'power2.in', onComplete: () => {
-                    currentOutput = null;
-                    resultView.style.opacity = 1;
-                    resultView.style.transform = 'scale(1)';
+                    currentOutput = null; resultView.style.opacity = 1; resultView.style.transform = 'scale(1)';
                     renderCurrentState();
                 }
             });
@@ -744,25 +844,17 @@
         function resetEngine() {
             gsap.to([consoleContainer, resultView], {
                 opacity: 0, duration: 0.3, onComplete: () => {
-                    historyStack = [];
-                    currentOutput = null;
-                    consoleContainer.style.opacity = 1;
-                    resultView.style.opacity = 1;
+                    historyStack = []; currentOutput = null; consoleContainer.style.opacity = 1; resultView.style.opacity = 1;
                     renderCurrentState();
                 }
             });
         }
 
         function copyResult() {
-            navigator.clipboard.writeText(OUTPUTS[currentOutput]).then(() => {
-                alert('DATA COPIED TO CLIPBOARD');
-            });
+            navigator.clipboard.writeText(OUTPUTS[currentOutput]).then(() => { alert('系统诊断结果与专业建议已复制到剪贴板。'); });
         }
 
-        // ==========================================
-        // 3. 初始化与氛围数据
-        // ==========================================
-        // ==========================================
+        // 初始化
         renderCurrentState();
     </script>
 </body>
