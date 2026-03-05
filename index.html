@@ -82,21 +82,17 @@
 
         .custom-scrollbar {
             overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(0, 113, 185, 0.2) transparent;
+            /* 隐藏 Firefox 滚动条 */
+            scrollbar-width: none;
+            /* 旧版本 Firefox 兼容 */
+            -ms-overflow-style: none;
         }
 
+        /* 彻底隐藏 Webkit (Chrome/Safari/Edge) 内部的滚动轴结构 */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
+            display: none;
+            width: 0px;
             background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 113, 185, 0.2);
-            border-radius: 4px;
         }
 
         /* ================= 面板与修饰 ================= */
