@@ -174,22 +174,34 @@
             transform: translate(5px, -50%);
         }
 
-        .spotlight-card:hover,
+        @media (hover: hover) {
+            .spotlight-card:hover {
+                background: #ffffff;
+                border-color: rgba(0, 113, 185, 0.4);
+                box-shadow: 0 8px 20px -6px rgba(0, 113, 185, 0.25), 0 0 0 1px rgba(0, 113, 185, 0.4);
+                transform: translateY(-2px);
+                padding-left: 2rem !important;
+                padding-right: 2rem !important;
+                z-index: 10;
+            }
+
+            .spotlight-card:hover .bracket {
+                opacity: 1;
+                transform: translate(0, -50%);
+                font-weight: bold;
+            }
+        }
+
         .spotlight-card.active-selected {
             background: #ffffff;
             border-color: rgba(0, 113, 185, 0.4);
-            box-shadow: 0 8px 20px -6px rgba(0, 113, 185, 0.25), 0 0 0 1px rgba(0, 113, 185, 0.4);
+            box-shadow: 0 4px 15px -4px rgba(0, 113, 185, 0.3), inset 0 0 0 2px rgba(0, 113, 185, 0.2);
             transform: translateY(-2px);
             padding-left: 2rem !important;
             padding-right: 2rem !important;
             z-index: 10;
         }
 
-        .spotlight-card.active-selected {
-            box-shadow: 0 4px 15px -4px rgba(0, 113, 185, 0.3), inset 0 0 0 2px rgba(0, 113, 185, 0.2);
-        }
-
-        .spotlight-card:hover .bracket,
         .spotlight-card.active-selected .bracket {
             opacity: 1;
             transform: translate(0, -50%);
@@ -301,7 +313,7 @@
                 </div>
                 <!-- 严格保留的底部免责小字 -->
                 <div class="shrink-0 mt-8 text-center">
-                    <p class="font-mono text-[10px] text-charcoal/40 tracking-wide">结果仅供参考，不构成法律意见，最终定级需专家评估。</p>
+                    <p class="font-mono text-[10px] text-charcoal/40 tracking-wide">评估结果仅供参考，不构成法律意见，最终定级需专家评估。</p>
                     <p class="mt-1 font-mono text-[10px] text-charcoal/40 tracking-wide">&copy; 2026 TÜV Rheinland. All
                         rights reserved.</p>
                 </div>
@@ -399,11 +411,11 @@
                                 <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
                                 <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                             </svg>
-                            拷贝结果
+                            拷贝专业报告
                         </button>
                         <button onclick="resetEngine()"
                             class="bg-transparent text-tuvBlue border border-tuvBlue/30 px-5 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded hover:bg-tuvBlue/5 transition-all">
-                            重新测试
+                            重新开始
                         </button>
                     </div>
 
@@ -491,9 +503,9 @@
             'R1': '本法案仅对进入欧盟的AI系统/AI产品进行规范，暂不适用您的场景。\n但建议您将其作为全球合规基准参考，为您未来进入全球市场奠定技术合规的基础。',
             'R2': '您的产品/服务可能涉及EU AI Act中所定义的“禁止性AI实践”，此类服务/产品在欧盟被严格禁止，请立即修改产品/服务定义',
             'R3': '您的产品/服务很大可能属于通用AI模型，可以投放市场，但须按照欧盟《人工智能法案》（EU AI Act）的要求履行技术文档、数据版权合规等义务；若您的模型被认为具有系统性风险，还需履行模型评估、报告严重事件等额外义务。\n关于通用AI系统合规的细节要求，可联系TÜV莱茵免费咨询。',
-            'R4': '您的AI系统很大可能属于高风险人工智能系统，可以投放市场，但须按照欧盟《人工智能法案》（EU AI Act）的要求履行质量管理体系、风险管理体系、数据治理、人类监督、网络安全等多项合规义务（详见EU AI Act Article 9-Article 15）。\n\nTÜV莱茵提供覆盖全产品周期战略合规解决方案，通过合规前置，在产品定义与架构评估阶段协助企业精准界定AI风险等级，有效规避风险，助您在保障产品安全可靠的前提下，以最优合规成本和最快上市速度，稳健锁定欧盟市场AI产品的准入资格。',
+            'R4': '您的AI系统很大可能属于高风险人工智能系统，可以投放市场，但须按照欧盟《人工智能法案》（EU AI Act）的要求履行质量管理体系、风险管理体系、数据治理、人类监督、网络安全等多项合规义务（详见EU AI Act Article 9-Article 15）。\n\nTÜV莱茵提供覆盖全产品生命周期的战略性合规解决方案，助力企业精准评估AI风险等级，提前识别潜在风险，并制定和实施切实可行的合规计划，以前瞻性和可操作性的方式，全面保障企业AI产品顺利进入欧盟市场的合规性。',
             'R5': '您的AI系统很大可能属于有限风险的人工智能系统，需要遵循透明度义务，即明确标识“由AI生成”或“正在与AI对话”，并添加数字水印。\n关于透明度义务声明的细节要求，可联系TÜV莱茵免费咨询。',
-            'R6': '恭喜您！您的AI系统很大可能属于最小风险AI，受到的监管限制较少，建议您可以自愿签署透明度义务声明/告知，展示企业的合规责任感。'
+            'R6': '恭喜您！您的AI系统很大可能属于最小风险人工智能系统，受到的监管限制较少，建议您可以自愿签署透明度义务声明/告知，展示企业的合规责任感。'
         };
 
         // ==========================================
@@ -514,7 +526,7 @@
         const r4ExtraContainer = document.getElementById('r4-extra-content');
 
         function formatItalicEmphasis(text) {
-            const regex = /(高风险人工智能系统|通用AI模型|有限风险的人工智能系统|最小风险AI|禁止性AI实践|安全组件|高风险|最小风险|有限风险)/g;
+            const regex = /(高风险人工智能系统|通用AI模型|有限风险的人工智能系统|最小风险人工智能系统|禁止性AI实践|安全组件|高风险|最小风险|有限风险)/g;
             let formatted = text.replace(regex, '<span class="risk-italic">$1</span>');
             return formatted.replace(/\n/g, '<br>'); // 精准保留原版换行
         }
@@ -559,7 +571,7 @@
                 btn.innerHTML = `
                     <span class="bracket left hidden md:inline-block">[</span>
                     <span class="font-sans text-[13px] md:text-[15px] text-charcoal leading-snug z-10 w-full pr-6">${opt.text}</span>
-                    <div class="absolute right-3 md:right-4 w-5 h-5 shrink-0 border border-tuvBlue/30 flex items-center justify-center text-tuvBlue opacity-0 group-[.active-selected]:opacity-100 group-hover:opacity-100 transition-opacity z-10 bg-white">
+                    <div class="absolute right-3 md:right-4 w-5 h-5 shrink-0 border border-tuvBlue/30 flex items-center justify-center text-tuvBlue opacity-0 group-[.active-selected]:opacity-100 md:group-hover:opacity-100 transition-opacity z-10 bg-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                     <span class="bracket right hidden md:inline-block">]</span>
@@ -594,15 +606,17 @@
             let visualHTML = '';
 
             // =====================================
-            // 纯SVG数学等距透视金字塔 (45度水平视角模拟) 
+            // 纯SVG数学等距透视金字塔 (已应用全新指定配色)
             // =====================================
             if (['R2', 'R4', 'R5', 'R6'].includes(currentOutput)) {
 
+                // 全新色彩配置
+                // colorRight 为用户指定高光色，colorLeft 为自动调和的暗面色以维持 3D 体积感
                 const TIERS = [
-                    { name: '禁止性AI实践', colorLeft: '#00263E', colorRight: '#003B60', activeOut: 'R2' },
-                    { name: '高风险人工智能系统', colorLeft: '#004068', colorRight: '#005a93', activeOut: 'R4' },
-                    { name: '有限风险的人工智能系统', colorLeft: '#005387', colorRight: '#0071B9', activeOut: 'R5' },
-                    { name: '最小风险AI', colorLeft: '#327ba8', colorRight: '#4aa0db', activeOut: 'R6' }
+                    { name: '禁止性AI实践', colorLeft: '#B33B18', colorRight: '#DA4B21', activeOut: 'R2' },
+                    { name: '高风险人工智能系统', colorLeft: '#BE6300', colorRight: '#E57800', activeOut: 'R4' },
+                    { name: '有限风险的人工智能系统', colorLeft: '#DBA10A', colorRight: '#F9BB10', activeOut: 'R5' },
+                    { name: '最小风险人工智能系统', colorLeft: '#008896', colorRight: '#008896', activeOut: 'R6' }
                 ];
 
                 let t = 0; // 进度
@@ -639,10 +653,11 @@
                     let jointY = avgY - 10;
                     let endX = 265;
 
+                    // 非激活层级的引线和发光点采用低调统一的半透明灰色 (rgba(134,134,139,0.3))，确保不干扰激活层的主色调
                     let callout = `
-                        <polyline points="${avgX},${avgY} ${jointX},${jointY} ${endX},${jointY}" fill="none" stroke="${isActive ? tier.colorRight : 'rgba(0,113,185,0.2)'}" stroke-width="${isActive ? 2 : 1.5}" />
+                        <polyline points="${avgX},${avgY} ${jointX},${jointY} ${endX},${jointY}" fill="none" stroke="${isActive ? tier.colorRight : 'rgba(134,134,139,0.3)'}" stroke-width="${isActive ? 2 : 1.5}" />
                         <circle cx="${avgX}" cy="${avgY}" r="${isActive ? 3.5 : 2}" fill="${isActive ? '#fff' : tier.colorRight}" stroke="${tier.colorRight}" stroke-width="${isActive ? 2 : 0}" />
-                        <circle cx="${endX}" cy="${jointY}" r="1.5" fill="${isActive ? tier.colorRight : 'rgba(0,113,185,0.5)'}" />
+                        <circle cx="${endX}" cy="${jointY}" r="1.5" fill="${isActive ? tier.colorRight : 'rgba(134,134,139,0.5)'}" />
                         <text x="${endX + 10}" y="${jointY + 1}" fill="${isActive ? tier.colorRight : '#86868b'}" font-size="${isActive ? '15' : '11.5'}" font-weight="${isActive ? '700' : '500'}" dominant-baseline="central" font-family="'Plus Jakarta Sans', sans-serif" letter-spacing="1">
                             ${tier.name}
                         </text>
@@ -660,7 +675,8 @@
 
                 visualHTML = `
                 <div class="relative w-full h-full flex items-center justify-center p-4">
-                    <div class="absolute inset-0 bg-tuvBlue/5 blur-3xl rounded-full scale-110"></div>
+                    <!-- 底部环境光稍微削弱，以免与新的丰富配色冲突 -->
+                    <div class="absolute inset-0 bg-charcoal/5 blur-3xl rounded-full scale-110"></div>
                     <!-- 确保SVG本身不会导致溢出 -->
                     <svg viewBox="0 0 450 300" class="w-full max-w-full h-auto drop-shadow-xl overflow-visible z-10">
                         ${svgContent}
