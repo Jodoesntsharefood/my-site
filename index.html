@@ -411,11 +411,11 @@
                                 <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
                                 <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                             </svg>
-                            拷贝专业报告
+                            拷贝结果
                         </button>
                         <button onclick="resetEngine()"
                             class="bg-transparent text-tuvBlue border border-tuvBlue/30 px-5 py-3 font-mono uppercase tracking-widest text-[11px] font-bold rounded hover:bg-tuvBlue/5 transition-all">
-                            重新开始
+                            重新测试
                         </button>
                     </div>
 
@@ -867,7 +867,7 @@
         }
 
         function copyResult() {
-            navigator.clipboard.writeText(OUTPUTS[currentOutput]).then(() => { alert('系统诊断结果与专业建议已复制到剪贴板。'); });
+            navigator.clipboard.writeText(OUTPUTS[currentOutput]).then(() => { alert('结果已拷贝到剪贴板。'); });
         }
 
         // 初始化
