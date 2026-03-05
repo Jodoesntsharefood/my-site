@@ -507,7 +507,7 @@
             'R2': '您的产品/服务可能涉及EU AI Act中所定义的“禁止性AI实践”，此类服务/产品在欧盟被严格禁止，请立即修改产品/服务定义',
             'R3': '您的产品/服务很大可能属于通用AI模型，可以投放市场，但须按照欧盟《人工智能法案》（EU AI Act）的要求履行技术文档、数据版权合规等义务；若您的模型被认为具有系统性风险，还需履行模型评估、报告严重事件等额外义务。\n关于通用AI系统合规的细节要求，可联系TÜV莱茵免费咨询。',
             'R4': '您的AI系统很大可能属于高风险人工智能系统，可以投放市场，但须按照欧盟《人工智能法案》（EU AI Act）的要求履行质量管理体系、风险管理体系、数据治理、人类监督、网络安全等多项合规义务（详见EU AI Act Article 9-Article 15）。\n\nTÜV莱茵提供覆盖全产品生命周期的战略性合规解决方案，助力企业精准评估AI风险等级，提前识别潜在风险，并制定和实施切实可行的合规计划，以前瞻性和可操作性的方式，全面保障企业AI产品顺利进入欧盟市场的合规性。',
-            'R5': '您的AI系统很大可能属于有限风险的人工智能系统，需要遵循透明度义务，即明确标识“由AI生成”或“正在与AI对话”，并添加数字水印。\n关于透明度义务声明的细节要求，可联系TÜV莱茵免费咨询。',
+            'R5': '您的AI系统很大可能属于有限风险人工智能系统，需要遵循透明度义务，即明确标识“由AI生成”或“正在与AI对话”，并添加数字水印。\n关于透明度义务声明的细节要求，可联系TÜV莱茵免费咨询。',
             'R6': '恭喜您！您的AI系统很大可能属于最小风险人工智能系统，受到的监管限制较少，建议您可以自愿签署透明度义务声明/告知，展示企业的合规责任感。'
         };
 
@@ -529,7 +529,7 @@
         const r4ExtraContainer = document.getElementById('r4-extra-content');
 
         function formatItalicEmphasis(text) {
-            const regex = /(高风险人工智能系统|通用AI模型|有限风险的人工智能系统|最小风险人工智能系统|禁止性AI实践|安全组件|高风险|最小风险|有限风险)/g;
+            const regex = /(高风险人工智能系统|通用AI模型|有限风险人工智能系统|最小风险人工智能系统|禁止性AI实践|安全组件|高风险|最小风险|有限风险)/g;
             let formatted = text.replace(regex, '<span class="risk-italic">$1</span>');
             return formatted.replace(/\n/g, '<br>'); // 精准保留原版换行
         }
@@ -618,7 +618,7 @@
                 const TIERS = [
                     { name: '禁止性AI实践', colorLeft: '#B33B18', colorRight: '#DA4B21', activeOut: 'R2' },
                     { name: '高风险人工智能系统', colorLeft: '#BE6300', colorRight: '#E57800', activeOut: 'R4' },
-                    { name: '有限风险的人工智能系统', colorLeft: '#DBA10A', colorRight: '#F9BB10', activeOut: 'R5' },
+                    { name: '有限风险人工智能系统', colorLeft: '#DBA10A', colorRight: '#F9BB10', activeOut: 'R5' },
                     { name: '最小风险人工智能系统', colorLeft: '#008896', colorRight: '#008896', activeOut: 'R6' }
                 ];
 
@@ -636,7 +636,7 @@
                     const DX = 100;
                     const DY_MID = 240;
                     const DY_EDGE = 180;
-                    const Y_BASE = 20;
+                    const Y_BASE = 45; // 增加顶部安全距离，避免尖端被遮挡
 
                     let pt1 = `${X_CENTER},${Y_BASE + DY_MID * t1}`;
                     let pl2 = `${X_CENTER - DX * t1},${Y_BASE + DY_EDGE * t1}`;
@@ -667,7 +667,7 @@
                     `;
 
                     svgContent += `
-                        <g class="tier-layer" opacity="0" transform="translate(0, 20)">
+                        <g class="tier-layer" opacity="0">
                             ${faceLeft}
                             ${faceRight}
                             ${isActive ? `<polygon points="${pt1} ${pr2} ${pr3} ${pt4}" fill="white" opacity="0.1" />` : ''} 
@@ -681,7 +681,7 @@
                     <!-- 底部环境光稍微削弱，以免与新的丰富配色冲突 -->
                     <div class="absolute inset-0 bg-charcoal/5 blur-3xl rounded-full scale-110"></div>
                     <!-- 确保SVG本身不会导致溢出 -->
-                    <svg viewBox="0 0 450 300" class="w-full max-w-full h-auto drop-shadow-xl overflow-visible z-10">
+                    <svg viewBox="0 0 450 320" class="w-full max-w-full h-auto drop-shadow-xl overflow-visible z-10">
                         ${svgContent}
                     </svg>
                 </div>
@@ -820,6 +820,12 @@
                 r4ExtraContainer.innerHTML = '';
                 r4ExtraContainer.classList.add('hidden');
                 r4ExtraContainer.classList.remove('block');
+            }
+
+            // 确保每次展示结果时，滚动条强制回归顶部（修复触屏点击底部选项时的残留滚动）
+            const resultScrollArea = resultView.querySelector('.overflow-y-auto');
+            if (resultScrollArea) {
+                resultScrollArea.scrollTop = 0;
             }
 
             // 执行整体淡入动画
