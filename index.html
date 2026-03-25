@@ -748,67 +748,67 @@
             outputText.innerHTML = formatItalicEmphasis(OUTPUTS[currentOutput]);
 
             // =====================================
-            // 专属高风险 (R4) 额外专家联系卡片展示逻辑 (横屏 Dashboard 布局)
+            // 专家联系卡片展示逻辑 (横屏 Dashboard 布局)
             // =====================================
-            if (currentOutput === 'R4') {
-                r4ExtraContainer.innerHTML = `
-                    <div class="w-full bg-white/70 border border-tuvBlue/15 rounded-[1.5rem] shadow-sm relative overflow-hidden flex flex-col md:flex-row gap-6 p-6">
-                        <!-- 装饰高光 -->
-                        <div class="absolute -right-8 -top-8 w-40 h-40 bg-tuvBlue/5 rounded-full blur-2xl pointer-events-none"></div>
-                        
-                        <!-- 左半部：文案介绍 -->
-                        <div class="flex-1 flex flex-col justify-center">
-                            <h4 class="text-tuvBlue font-bold text-[14px] md:text-base mb-3 flex items-center gap-2">
-                                <svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                TÜV莱茵电子电气产品服务
-                            </h4>
-                            <p class="text-[12px] md:text-[13px] text-charcoal/70 leading-relaxed text-justify">
-                                依托全球权威资质体系，面向显示、通信与智能终端等多领域产品，提供涵盖安全合规、能效、EMC、RF及信息与AI相关服务在内的全链条检测认证解决方案。
-                            </p>
+            r4ExtraContainer.innerHTML = `
+                <div class="w-full bg-white/70 border border-tuvBlue/15 rounded-[1.5rem] shadow-sm relative overflow-hidden flex flex-col md:flex-row gap-6 p-6">
+                    <!-- 装饰高光 -->
+                    <div class="absolute -right-8 -top-8 w-40 h-40 bg-tuvBlue/5 rounded-full blur-2xl pointer-events-none"></div>
+                    
+                    <!-- 左半部：文案介绍 -->
+                    <div class="flex-1 flex flex-col justify-center">
+                        <h4 class="text-tuvBlue font-bold text-[14px] md:text-base mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            TÜV莱茵电子电气产品服务
+                        </h4>
+                        <p class="text-[12px] md:text-[13px] text-charcoal/70 leading-relaxed text-justify">
+                            依托全球权威资质体系，面向显示、通信与智能终端等多领域产品，提供涵盖安全合规、能效、EMC、RF及信息与AI相关服务在内的全链条检测认证解决方案。
+                        </p>
+                    </div>
+                    
+                    <!-- 分割线 (PC端竖线，移动端横线) -->
+                    <div class="hidden md:block w-px bg-tuvBlue/10 self-stretch"></div>
+                    <div class="md:hidden h-px w-full bg-tuvBlue/10"></div>
+
+                    <!-- 右半部：联系方式与二维码 -->
+                    <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center shrink-0 w-full sm:w-auto">
+                        <!-- 联系方式区 -->
+                        <div class="space-y-3">
+                            <div class="text-[10px] uppercase font-mono tracking-widest text-muted font-bold">Contact Us</div>
+                            <div class="flex items-center gap-3 text-[12px] text-charcoal">
+                                <div class="w-7 h-7 rounded-full bg-tuvBlue/10 flex items-center justify-center text-tuvBlue shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                </div>
+                                <span class="font-mono font-medium text-[13px]">400-883-1300<span class="text-charcoal/40 text-[10px] ml-1"></span></span>
+                            </div>
+                            <div class="flex items-center gap-3 text-[12px] text-charcoal">
+                                <div class="w-7 h-7 rounded-full bg-tuvBlue/10 flex items-center justify-center text-tuvBlue shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                </div>
+                                <span class="font-mono font-medium text-[13px]">Evelyn.Tang@tuv.com<span class="text-charcoal/40 text-[10px] ml-1"></span></span>
+                            </div>
                         </div>
                         
-                        <!-- 分割线 (PC端竖线，移动端横线) -->
-                        <div class="hidden md:block w-px bg-tuvBlue/10 self-stretch"></div>
-                        <div class="md:hidden h-px w-full bg-tuvBlue/10"></div>
-
-                        <!-- 右半部：联系方式与二维码 -->
-                        <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center shrink-0 w-full sm:w-auto">
-                            <!-- 联系方式区 -->
-                            <div class="space-y-3">
-                                <div class="text-[10px] uppercase font-mono tracking-widest text-muted font-bold">Contact Us</div>
-                                <div class="flex items-center gap-3 text-[12px] text-charcoal">
-                                    <div class="w-7 h-7 rounded-full bg-tuvBlue/10 flex items-center justify-center text-tuvBlue shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                    </div>
-                                    <span class="font-mono font-medium text-[13px]">400-883-1300<span class="text-charcoal/40 text-[10px] ml-1"></span></span>
+                        <!-- 二维码矩阵 -->
+                        <div class="flex gap-3 shrink-0 w-full sm:w-auto justify-center sm:justify-start self-center sm:self-auto">
+                            <div class="flex flex-col items-center gap-1.5">
+                                <div class="w-[64px] h-[64px] bg-white border border-tuvBlue/20 rounded-md flex items-center justify-center p-1 shadow-sm overflow-hidden">
+                                    <img src="./合规初筛工具/qrcode.jpg" alt="服务号二维码" class="w-full h-full object-cover rounded-sm">
                                 </div>
-                                <div class="flex items-center gap-3 text-[12px] text-charcoal">
-                                    <div class="w-7 h-7 rounded-full bg-tuvBlue/10 flex items-center justify-center text-tuvBlue shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                                    </div>
-                                    <span class="font-mono font-medium text-[13px]">contact@tuv.com<span class="text-charcoal/40 text-[10px] ml-1"></span></span>
-                                </div>
+                                <span class="text-[9px] text-charcoal/60 tracking-wider font-medium">官方服务号</span>
                             </div>
-                            
-                            <!-- 二维码矩阵 -->
-                            <div class="flex gap-3 shrink-0 w-full sm:w-auto justify-center sm:justify-start self-center sm:self-auto">
-                                <div class="flex flex-col items-center gap-1.5">
-                                    <div class="w-[64px] h-[64px] bg-white border border-tuvBlue/20 rounded-md flex items-center justify-center p-1 shadow-sm overflow-hidden">
-                                        <img src="./qrcode.jpg" alt="服务号二维码" class="w-full h-full object-cover rounded-sm">
-                                    </div>
-                                    <span class="text-[9px] text-charcoal/60 tracking-wider font-medium">官方服务号</span>
+                            <div class="flex flex-col items-center gap-1.5">
+                                <div class="w-[64px] h-[64px] bg-white border border-tuvBlue/20 rounded-md flex items-center justify-center p-1 shadow-sm overflow-hidden">
+                                    <img src="./合规初筛工具/Registration.jpg" alt="问卷调查二维码" class="w-full h-full object-cover rounded-sm">
                                 </div>
+                                <span class="text-[9px] text-charcoal/60 tracking-wider font-medium">问卷调查</span>
                             </div>
                         </div>
                     </div>
-                `;
-                r4ExtraContainer.classList.remove('hidden');
-                r4ExtraContainer.classList.add('block');
-            } else {
-                r4ExtraContainer.innerHTML = '';
-                r4ExtraContainer.classList.add('hidden');
-                r4ExtraContainer.classList.remove('block');
-            }
+                </div>
+            `;
+            r4ExtraContainer.classList.remove('hidden');
+            r4ExtraContainer.classList.add('block');
 
             // 确保每次展示结果时，滚动条强制回归顶部（修复触屏点击底部选项时的残留滚动）
             const resultScrollArea = resultView.querySelector('.overflow-y-auto');
@@ -819,10 +819,7 @@
             // 执行整体淡入动画
             gsap.fromTo(resultView, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
 
-            // 针对 R4 额外卡片单独加入轻盈上浮入场动画
-            if (currentOutput === 'R4') {
-                gsap.fromTo(r4ExtraContainer, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, delay: 0.3, ease: 'power2.out' });
-            }
+
 
             // 针对3D SVG阶层注入交错入场动画，营造数据扫描生成感
             const tierLayers = document.querySelectorAll('.tier-layer');
